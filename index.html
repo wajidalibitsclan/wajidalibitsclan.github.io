@@ -693,14 +693,12 @@
   <div class="sidebar-section">
     <span class="sidebar-label">SSH Setup</span>
     <a href="#part1"><span class="num">01</span> Generate SSH Key</a>
-    <a href="#part1b"><span class="num">02</span> Add Key to GitHub <span class="new-badge">NEW</span></a>
-    <a href="#part2"><span class="num">03</span> Copy Key to VPS</a>
-    <a href="#part3"><span class="num">04</span> Test Connection</a>
-    <a href="#part4"><span class="num">05</span> Secure Server</a>
+    <a href="#part2"><span class="num">02</span> Connect to VPS</a>
+    <a href="#part4"><span class="num">03</span> Secure Server</a>
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">CI/CD Pipelines</span>
-    <a href="#part5"><span class="num">06</span> Pipeline Setup</a>
+    <a href="#part5"><span class="num">04</span> Pipeline Setup</a>
     <a href="#python-pipelines"><span class="num">—</span> Python Pipelines</a>
     <a href="#js-pipelines"><span class="num">—</span> JavaScript Pipelines</a>
     <a href="#php-pipelines"><span class="num">—</span> PHP Pipeline</a>
@@ -708,19 +706,19 @@
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">Deployment</span>
-    <a href="#part6"><span class="num">07</span> Prepare Server</a>
-    <a href="#part6b"><span class="num">08</span> Setup Database <span class="new-badge">NEW</span></a>
-    <a href="#part7"><span class="num">09</span> Deploy App</a>
-    <a href="#part8"><span class="num">10</span> Keep App Running</a>
-    <a href="#part9"><span class="num">11</span> Nginx Configs</a>
-    <a href="#part9b"><span class="num">12</span> DNS Setup <span class="new-badge">NEW</span></a>
-    <a href="#part10"><span class="num">13</span> SSL (HTTPS)</a>
+    <a href="#part6"><span class="num">05</span> Prepare Server</a>
+    <a href="#part6b"><span class="num">06</span> Setup Database <span class="new-badge">NEW</span></a>
+    <a href="#part7"><span class="num">07</span> Deploy App</a>
+    <a href="#part8"><span class="num">08</span> Keep App Running</a>
+    <a href="#part9"><span class="num">09</span> Nginx Configs</a>
+    <a href="#part9b"><span class="num">10</span> Subdomain & DNS <span class="new-badge">NEW</span></a>
+    <a href="#part10"><span class="num">11</span> SSL (HTTPS)</a>
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">Reference</span>
-    <a href="#quickref"><span class="num">14</span> Quick Reference</a>
-    <a href="#rollback"><span class="num">15</span> Rollback Strategy <span class="new-badge">NEW</span></a>
-    <a href="#troubleshooting"><span class="num">16</span> Troubleshooting</a>
+    <a href="#quickref"><span class="num">12</span> Quick Reference</a>
+    <a href="#rollback"><span class="num">13</span> Rollback Strategy <span class="new-badge">NEW</span></a>
+    <a href="#troubleshooting"><span class="num">14</span> Troubleshooting</a>
   </div>
 </nav>
 
@@ -735,7 +733,7 @@
     Complete Step-by-Step Guide &middot; Enhanced Edition
   </div>
   <h1>SSH Key Setup, CI/CD Pipelines<br>& VPS Deployment</h1>
-  <p>Everything you need to go from local development to automated production deployments — with every command for Windows and Ubuntu.</p>
+  <p>Everything you need to go from local development to automated production deployments — built for teams with multiple developers and multiple projects on a single VPS.</p>
   <div class="hero-frameworks">
     <span class="framework-pill"><span class="dot" style="background:#009688"></span> FastAPI</span>
     <span class="framework-pill"><span class="dot" style="background:#092e20"></span> Django</span>
@@ -751,13 +749,12 @@
 <!-- FLOW OVERVIEW -->
 <div class="flow-overview">
   <div class="flow-step"><div class="flow-num">01</div><div class="flow-label">Generate<br>SSH Key</div></div>
-  <div class="flow-step new-step"><div class="flow-num">02</div><div class="flow-label">Add to<br>GitHub</div></div>
-  <div class="flow-step"><div class="flow-num">03</div><div class="flow-label">Copy to<br>VPS</div></div>
-  <div class="flow-step"><div class="flow-num">04</div><div class="flow-label">Test &<br>Secure</div></div>
-  <div class="flow-step"><div class="flow-num">05</div><div class="flow-label">CI/CD<br>Pipeline</div></div>
-  <div class="flow-step new-step"><div class="flow-num">06</div><div class="flow-label">Database<br>Setup</div></div>
-  <div class="flow-step"><div class="flow-num">07</div><div class="flow-label">Deploy<br>App</div></div>
-  <div class="flow-step new-step"><div class="flow-num">08</div><div class="flow-label">DNS &<br>SSL</div></div>
+  <div class="flow-step"><div class="flow-num">02</div><div class="flow-label">Connect<br>to VPS</div></div>
+  <div class="flow-step"><div class="flow-num">03</div><div class="flow-label">Secure<br>Server</div></div>
+  <div class="flow-step"><div class="flow-num">04</div><div class="flow-label">CI/CD<br>Pipeline</div></div>
+  <div class="flow-step new-step"><div class="flow-num">05</div><div class="flow-label">Subdomain<br>& DNS</div></div>
+  <div class="flow-step"><div class="flow-num">06</div><div class="flow-label">Deploy<br>App</div></div>
+  <div class="flow-step new-step"><div class="flow-num">07</div><div class="flow-label">SSL<br>(HTTPS)</div></div>
 </div>
 
 <hr>
@@ -765,8 +762,15 @@
 <!-- ====== PREREQUISITES ====== -->
 <section class="section" id="prerequisites">
   <div class="section-label"><span class="line"></span> PREREQUISITES</div>
-  <h2>Find Your Username</h2>
-  <p>Before starting, find your system username. It appears in all file paths throughout this guide.</p>
+  <h2>Before You Begin</h2>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>GITHUB REPOSITORY REQUIRED</strong> — This guide assumes your project is already pushed to a GitHub repository. If you haven't created your repo yet, do that first — initialize your project, push it to GitHub, then come back here to set up deployment.</div>
+  </div>
+
+  <h3>Find Your Username</h3>
+  <p>Find your system username — it appears in all file paths throughout this guide.</p>
 
   <h4>Windows</h4>
   <p>Open Command Prompt or PowerShell:</p>
@@ -802,32 +806,33 @@ youruser</pre>
 <!-- ====== PART 1 ====== -->
 <section class="section" id="part1">
   <div class="section-label"><span class="line"></span> PART 1</div>
-  <h2>Generate SSH Key</h2>
+  <h2>Generate SSH Key Pair</h2>
+  <p>Generate an SSH key pair on your <strong>local machine</strong> (skip if you already have one).</p>
 
   <div class="step" data-step="1">
     <h3>Open Your Terminal</h3>
-    <p><strong>Windows:</strong> <code>Win + R</code> → type <code>cmd</code> → Enter, or search <strong>Git Bash</strong></p>
-    <p><strong>Ubuntu:</strong> <code>Ctrl + Alt + T</code> to open terminal</p>
+    <p><strong>Windows:</strong> Open <strong>Git Bash</strong> or <strong>WSL</strong> (Windows Subsystem for Linux)</p>
+    <p><strong>Ubuntu / macOS:</strong> <code>Ctrl + Alt + T</code> to open terminal</p>
   </div>
 
   <div class="step" data-step="2">
     <h3>Generate Key Pair</h3>
-    <p>Run on both OS:</p>
+    <p>Run on your local machine:</p>
     <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"youruser@example.com"</span></pre>
+      <div class="code-header"><span class="file-icon">Terminal / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span></pre>
     </div>
-    <h4>Windows output</h4>
+    <h4>Ubuntu / macOS output</h4>
     <div class="code-block">
-      <pre>Generating public/private ed25519 key pair.
-Enter file in which to save the key (C:\Users\youruser\.ssh\id_ed25519):</pre>
+      <pre>Generating public/private rsa key pair.
+Enter file in which to save the key (/home/youruser/.ssh/id_rsa):</pre>
     </div>
-    <h4>Ubuntu output</h4>
+    <h4>Windows (Git Bash / WSL) output</h4>
     <div class="code-block">
-      <pre>Generating public/private ed25519 key pair.
-Enter file in which to save the key (/home/youruser/.ssh/id_ed25519):</pre>
+      <pre>Generating public/private rsa key pair.
+Enter file in which to save the key (/c/Users/youruser/.ssh/id_rsa):</pre>
     </div>
-    <p>Press <strong>Enter</strong> to accept the default.</p>
+    <p>Press <strong>Enter</strong> to accept the default location.</p>
   </div>
 
   <div class="step" data-step="3">
@@ -836,107 +841,24 @@ Enter file in which to save the key (/home/youruser/.ssh/id_ed25519):</pre>
       <pre>Enter passphrase (empty for no passphrase):
 Enter same passphrase again:</pre>
     </div>
-    <p>Type a strong passphrase or press <strong>Enter</strong> to skip.</p>
+    <p>You can set a passphrase or press <strong>Enter</strong> to leave it empty.</p>
   </div>
 
   <div class="step" data-step="4">
-    <h3>Verify Key Created</h3>
-    <h4>Windows</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">dir</span> C:\Users\youruser\.ssh\</pre>
-    </div>
-    <h4>Ubuntu</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ls</span> <span class="flag">-la</span> ~/.ssh/</pre>
-    </div>
-    <p><code>id_ed25519</code> — Private key (never share) &nbsp;|&nbsp; <code>id_ed25519.pub</code> — Public key (goes on server)</p>
-  </div>
-
-  <div class="step" data-step="5">
-    <h3>View Public Key</h3>
-    <h4>Windows</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\id_ed25519.pub</pre>
-    </div>
-    <div class="callout tip">
-      <div class="callout-icon">✨</div>
-      <div><strong>TIP</strong> — Copy to clipboard: <code>clip &lt; C:\Users\youruser\.ssh\id_ed25519.pub</code></div>
-    </div>
-    <h4>Ubuntu</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_ed25519.pub</pre>
-    </div>
-    <p>Copy the entire output — you'll need it for both GitHub and your VPS.</p>
-  </div>
-</section>
-
-<hr>
-
-<!-- ====== PART 1B — ADD KEY TO GITHUB (NEW) ====== -->
-<section class="section" id="part1b">
-  <div class="section-label new-section"><span class="line"></span> PART 2 — ADDED</div>
-  <h2>Add SSH Key to GitHub <span class="added-tag">NEW</span></h2>
-  <p>Without this step, your VPS won't be able to <code>git clone</code> or <code>git pull</code> private repositories. Even for public repos, SSH access avoids rate limits and authentication prompts.</p>
-
-  <div class="step" data-step="1">
-    <h3>Copy Your Public Key</h3>
-    <p>If you haven't already, copy the output from Step 5 above.</p>
-  </div>
-
-  <div class="step" data-step="2">
-    <h3>Add to GitHub</h3>
-    <p>Go to <strong>GitHub.com</strong> → click your avatar → <strong>Settings</strong> → <strong>SSH and GPG keys</strong> → <strong>New SSH key</strong></p>
+    <h3>Key Location</h3>
+    <p>After generating, your keys are stored at:</p>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <thead><tr><th>OS</th><th>Private Key</th><th>Public Key</th></tr></thead>
         <tbody>
-          <tr><td>Title</td><td>A descriptive name, e.g. <code>My Laptop</code> or <code>Work PC</code></td></tr>
-          <tr><td>Key type</td><td><code>Authentication Key</code></td></tr>
-          <tr><td>Key</td><td>Paste entire public key (starts with <code>ssh-ed25519</code>)</td></tr>
+          <tr><td>Ubuntu / macOS</td><td><code>~/.ssh/id_rsa</code></td><td><code>~/.ssh/id_rsa.pub</code></td></tr>
+          <tr><td>Windows</td><td><code>C:\Users\youruser\.ssh\id_rsa</code></td><td><code>C:\Users\youruser\.ssh\id_rsa.pub</code></td></tr>
         </tbody>
       </table>
     </div>
-    <p>Click <strong>Add SSH key</strong> and confirm with your GitHub password.</p>
-  </div>
-
-  <div class="step" data-step="3">
-    <h3>Test GitHub Connection</h3>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-T</span> git@github.com</pre>
-    </div>
-    <p>Expected output:</p>
-    <div class="code-block">
-      <pre>Hi youruser! You've successfully authenticated, but GitHub does
-not provide shell access.</pre>
-    </div>
     <div class="callout warning">
       <div class="callout-icon">⚠️</div>
-      <div><strong>FIRST TIME?</strong> — If asked "Are you sure you want to continue connecting?", type <code>yes</code> and press Enter. This adds GitHub to your known hosts.</div>
-    </div>
-  </div>
-
-  <div class="step" data-step="4">
-    <h3>Also Add a Key on Your VPS</h3>
-    <p>Your VPS also needs to authenticate with GitHub to run <code>git pull</code>. SSH into your VPS and generate a <strong>separate</strong> key pair there:</p>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"vps-server"</span>
-<span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_ed25519.pub</pre>
-    </div>
-    <p>Add this VPS public key to GitHub the same way (Settings → SSH keys). Name it something like <code>VPS Production Server</code>.</p>
-    <p>Test from VPS:</p>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-T</span> git@github.com</pre>
-    </div>
-    <div class="callout danger">
-      <div class="callout-icon">🚨</div>
-      <div><strong>CRITICAL</strong> — Without this, every <code>git pull</code> in your CI/CD deploy script will fail with "Permission denied (publickey)" on private repos.</div>
+      <div><strong>NEVER SHARE</strong> your private key (<code>id_rsa</code>). Only the public key (<code>id_rsa.pub</code>) goes on the server.</div>
     </div>
   </div>
 </section>
@@ -945,73 +867,92 @@ not provide shell access.</pre>
 
 <!-- ====== PART 2 ====== -->
 <section class="section" id="part2">
-  <div class="section-label"><span class="line"></span> PART 3</div>
+  <div class="section-label"><span class="line"></span> PART 2</div>
   <h2>Copy Public Key to VPS</h2>
+  <p>Copy your public key to the VPS so you can authenticate without a password. Multiple developers will use this server — each one generates their own key and adds it.</p>
 
-  <h3>Method A: ssh-copy-id (Easiest)</h3>
-  <div class="code-block">
-    <div class="code-header"><span class="file-icon">Ubuntu / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">ssh-copy-id</span> youruser@your_server_ip</pre>
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div><strong>MULTI-DEVELOPER SETUP</strong> — Each developer generates their own SSH key (Part 1) and copies their public key to the VPS. Never share private keys between team members.</div>
   </div>
-  <p>Asks for server password one last time, then installs the key.</p>
 
-  <h3>Method B: Manual Copy</h3>
+  <h3>Option 1: Using ssh-copy-id (Linux / macOS / Git Bash)</h3>
   <div class="code-block">
-    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">ssh</span> youruser@your_server_ip
+    <div class="code-header"><span class="file-icon">Terminal / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">ssh-copy-id</span> <span class="flag">-p</span> <span class="n">2012</span> youruser@your_server_ip</pre>
+  </div>
+  <p>Replace <code>2012</code> with your SSH port (default is <code>22</code>), <code>youruser</code> with your VPS username, and <code>your_server_ip</code> with the VPS IP address.</p>
+  <p>You'll be prompted for the VPS password one last time. After this, your public key is installed.</p>
+
+  <h3>Option 2: Manual Copy (if ssh-copy-id isn't available)</h3>
+
+  <div class="step" data-step="1">
+    <h3>View Your Public Key</h3>
+    <h4>Ubuntu / macOS</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_rsa.pub</pre>
+    </div>
+    <h4>Windows</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Git Bash / WSL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cat</span> /c/Users/youruser/.ssh/id_rsa.pub</pre>
+    </div>
+    <p>Copy the entire output to your clipboard.</p>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Add Key to VPS</h3>
+    <p>Log in to your VPS with password and paste the key:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-p</span> <span class="n">2012</span> youruser@your_server_ip
 <span class="prompt">$ </span><span class="cmd">mkdir</span> <span class="flag">-p</span> ~/.ssh
 <span class="prompt">$ </span><span class="cmd">chmod</span> 700 ~/.ssh
-<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">"PASTE_YOUR_PUBLIC_KEY_HERE"</span> >> ~/.ssh/authorized_keys
-<span class="prompt">$ </span><span class="cmd">chmod</span> 600 ~/.ssh/authorized_keys
-<span class="prompt">$ </span><span class="cmd">exit</span></pre>
+<span class="prompt">$ </span><span class="cmd">nano</span> ~/.ssh/authorized_keys</pre>
+    </div>
+    <p>Paste your public key into the file, save and exit. Then set permissions:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">chmod</span> 600 ~/.ssh/authorized_keys</pre>
+    </div>
   </div>
 
+  <h3>Test SSH Connection (Passwordless Login)</h3>
+  <p>From your <strong>local machine</strong>, test the connection:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Terminal / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-p</span> <span class="n">2012</span> youruser@your_server_ip</pre>
+  </div>
+  <p>If everything is set up correctly, you should log in <strong>without entering a password</strong>.</p>
+
+  <h3>Adding More Developers</h3>
+  <p>Have each developer send you their <code>id_rsa.pub</code> content. SSH into the VPS and add their keys:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="c"># Add each developer's public key (one per line)</span>
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">"ssh-rsa AAAA... developer1@email.com"</span> >> ~/.ssh/authorized_keys
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">"ssh-rsa AAAA... developer2@email.com"</span> >> ~/.ssh/authorized_keys</pre>
+  </div>
   <div class="callout tip">
     <div class="callout-icon">✨</div>
-    <div><strong>TIP</strong> — Replace <code>PASTE_YOUR_PUBLIC_KEY_HERE</code> with output from Step 5.</div>
+    <div><strong>TIP</strong> — Each line in <code>authorized_keys</code> is one developer's key. View all keys: <code>cat ~/.ssh/authorized_keys</code></div>
   </div>
 
-  <h4>Windows PowerShell one-liner</h4>
+  <h3>Remove a Developer's Access</h3>
+  <p>If a developer leaves the team, remove their key:</p>
   <div class="code-block">
-    <div class="code-header"><span class="file-icon">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\id_ed25519.pub | <span class="cmd">ssh</span> youruser@your_server_ip <span class="s">"mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"</span></pre>
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">nano</span> ~/.ssh/authorized_keys
+<span class="c"># Find and delete the line with their key, then save</span></pre>
   </div>
-</section>
-
-<hr>
-
-<!-- ====== PART 3 ====== -->
-<section class="section" id="part3">
-  <div class="section-label"><span class="line"></span> PART 4</div>
-  <h2>Test SSH Connection</h2>
-  <div class="code-block">
-    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">ssh</span> youruser@your_server_ip
-Welcome to Ubuntu 24.04 LTS
-Last login: Tue Mar 03 12:00:00 2026</pre>
-  </div>
-  <p>You should connect <strong>without a password prompt</strong>.</p>
-
-  <h3>SSH Alias (Optional)</h3>
-  <div class="code-block">
-    <div class="code-header">
-      <span class="file-icon"><span class="dot" style="background:var(--orange)"></span> ~/.ssh/config</span>
-      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-    </div>
-    <pre><span class="k">Host</span> myserver
-    <span class="k">HostName</span> your_server_ip
-    <span class="k">User</span> youruser
-    <span class="k">Port</span> <span class="n">22</span>
-    <span class="k">IdentityFile</span> ~/.ssh/id_ed25519</pre>
-  </div>
-  <p>Now connect with: <code>ssh myserver</code></p>
 </section>
 
 <hr>
 
 <!-- ====== PART 4 ====== -->
 <section class="section" id="part4">
-  <div class="section-label"><span class="line"></span> PART 5</div>
+  <div class="section-label"><span class="line"></span> PART 3</div>
   <h2>Secure the Server</h2>
   <p>Run these commands <strong>on your VPS server</strong>.</p>
 
@@ -1094,7 +1035,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 5 — CI/CD ====== -->
 <section class="section" id="part5">
-  <div class="section-label"><span class="line"></span> PART 6</div>
+  <div class="section-label"><span class="line"></span> PART 4</div>
   <h2>CI/CD Pipeline Setup</h2>
   <p>Using <strong>GitHub Actions</strong> — every push to <code>main</code> triggers automatic testing and deployment to your VPS.</p>
 
@@ -1119,7 +1060,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
     <div class="callout new">
       <div class="callout-icon">💡</div>
-      <div><strong>UNDERSTANDING THE KEY FLOW</strong> — This deploy key lets GitHub Actions SSH <em>into</em> your VPS. It is <strong>separate</strong> from the VPS's own SSH key (Part 2 Step 4) which lets your VPS pull code <em>from</em> GitHub. You need both.</div>
+      <div><strong>UNDERSTANDING THE KEY FLOW</strong> — This deploy key lets GitHub Actions SSH <em>into</em> your VPS. It is <strong>separate</strong> from the VPS's own SSH key which lets your VPS pull code <em>from</em> GitHub. Make sure the VPS also has an SSH key added to GitHub.</div>
     </div>
   </div>
 
@@ -1672,7 +1613,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 6 — PREPARE SERVER ====== -->
 <section class="section" id="part6">
-  <div class="section-label"><span class="line"></span> PART 7</div>
+  <div class="section-label"><span class="line"></span> PART 5</div>
   <h2>Prepare Server</h2>
   <p>Install dependencies <strong>on your VPS server</strong>.</p>
 
@@ -1722,7 +1663,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 6B — DATABASE SETUP (NEW) ====== -->
 <section class="section" id="part6b">
-  <div class="section-label new-section"><span class="line"></span> PART 8 — ADDED</div>
+  <div class="section-label new-section"><span class="line"></span> PART 6 — ADDED</div>
   <h2>Setup Database <span class="added-tag">NEW</span></h2>
   <p>The CI/CD pipelines use test databases in GitHub Actions, but your VPS needs a real production database.</p>
 
@@ -1768,7 +1709,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 7 — DEPLOY ====== -->
 <section class="section" id="part7">
-  <div class="section-label"><span class="line"></span> PART 9</div>
+  <div class="section-label"><span class="line"></span> PART 7</div>
   <h2>Deploy Application</h2>
 
   <div class="callout new">
@@ -1825,7 +1766,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 8 — KEEP RUNNING ====== -->
 <section class="section" id="part8">
-  <div class="section-label"><span class="line"></span> PART 10</div>
+  <div class="section-label"><span class="line"></span> PART 8</div>
   <h2>Keep App Running</h2>
 
   <h3>PM2 (Node.js / Next.js)</h3>
@@ -1886,7 +1827,7 @@ WantedBy=multi-user.target</pre>
 
 <!-- ====== PART 9 — NGINX (EXPANDED) ====== -->
 <section class="section" id="part9">
-  <div class="section-label"><span class="line"></span> PART 11</div>
+  <div class="section-label"><span class="line"></span> PART 9</div>
   <h2>Nginx Configurations</h2>
   <p>Different frameworks need different Nginx configs. Pick the one that matches your stack.</p>
 
@@ -1984,34 +1925,71 @@ WantedBy=multi-user.target</pre>
 
 <!-- ====== PART 9B — DNS SETUP (NEW) ====== -->
 <section class="section" id="part9b">
-  <div class="section-label new-section"><span class="line"></span> PART 12 — ADDED</div>
-  <h2>DNS Setup <span class="added-tag">NEW</span></h2>
-  <p>Before you can get an SSL certificate, your domain must point to your VPS. Log into your domain registrar (Namecheap, GoDaddy, Cloudflare, etc.).</p>
-
-  <h3>Required DNS Records</h3>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr></thead>
-      <tbody>
-        <tr><td><code>A</code></td><td><code>@</code></td><td><code>your_server_ip</code></td><td>300</td></tr>
-        <tr><td><code>A</code></td><td><code>www</code></td><td><code>your_server_ip</code></td><td>300</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Verify DNS Propagation</h3>
-  <div class="code-block">
-    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">dig</span> +short your_domain.com
-203.0.113.50
-
-<span class="prompt">$ </span><span class="cmd">dig</span> +short www.your_domain.com
-203.0.113.50</pre>
-  </div>
+  <div class="section-label new-section"><span class="line"></span> PART 10 — ADDED</div>
+  <h2>Subdomain & DNS Setup <span class="added-tag">NEW</span></h2>
+  <p>Each project gets its own subdomain: <code>projectname.bitsclan.us</code>. This section walks through adding the DNS record and creating the virtual server on the VPS.</p>
 
   <div class="callout info">
     <div class="callout-icon">ℹ️</div>
-    <div><strong>PROPAGATION TIME</strong> — DNS changes can take 5 minutes to 48 hours. Use <a href="https://dnschecker.org" target="_blank" rel="noopener">dnschecker.org</a> to check worldwide propagation. Wait until DNS resolves correctly before running Certbot.</div>
+    <div><strong>MULTI-PROJECT SETUP</strong> — Multiple projects are deployed on the same VPS, each with its own subdomain. Every new project repeats these steps with a different project name.</div>
+  </div>
+
+  <div class="step" data-step="1">
+    <h3>Add DNS Record on my20.io</h3>
+    <p>Login to <strong>my20.io</strong> platform and navigate to <strong>Manage DNS</strong> → select <strong>bitsclan.us</strong> domain.</p>
+    <p>Add a new DNS record with these values:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Name</strong></td><td><code>projectname</code> (replace with your actual project name)</td></tr>
+          <tr><td><strong>Type</strong></td><td><code>A</code></td></tr>
+          <tr><td><strong>Data</strong></td><td>IP address of your VPS (e.g. <code>203.0.113.50</code>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Click <strong>Add Record</strong>. This creates <code>projectname.bitsclan.us</code> pointing to your VPS.</p>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Create Virtual Server on VPS Panel</h3>
+    <p>Login to your VPS panel at <strong>cpanel-new.bitsclan.us:10000</strong></p>
+    <ol>
+      <li>Click <strong>Create New Virtual Server</strong></li>
+      <li>Enter the subdomain name: <code>projectname.bitsclan.us</code></li>
+      <li>Click <strong>Create</strong></li>
+    </ol>
+    <p>This will create the project directory and link it to the subdomain automatically.</p>
+    <div class="callout tip">
+      <div class="callout-icon">✨</div>
+      <div><strong>PROJECT PATH</strong> — Your project files on the VPS will be at:<br>
+      <code>/home/project_name/public_html/</code><br>
+      This is where you'll deploy your code.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Test the Subdomain</h3>
+    <p>After creating the virtual server, a default page is automatically set up. Test it by visiting your subdomain in the browser:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Browser</span></div>
+      <pre>http://projectname.bitsclan.us</pre>
+    </div>
+    <p>If you see the default page, your subdomain is working correctly and you can proceed to deploy your actual project.</p>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Verify DNS Propagation</h3>
+    <p>If the subdomain doesn't load, check DNS propagation:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">dig</span> +short projectname.bitsclan.us
+203.0.113.50</pre>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div><strong>PROPAGATION TIME</strong> — DNS changes can take 5 minutes to 48 hours. Use <a href="https://dnschecker.org" target="_blank" rel="noopener">dnschecker.org</a> to check worldwide propagation. Wait until DNS resolves correctly before setting up SSL.</div>
+    </div>
   </div>
 </section>
 
@@ -2019,12 +1997,16 @@ WantedBy=multi-user.target</pre>
 
 <!-- ====== PART 10 — SSL ====== -->
 <section class="section" id="part10">
-  <div class="section-label"><span class="line"></span> PART 13</div>
+  <div class="section-label"><span class="line"></span> PART 11</div>
   <h2>SSL (HTTPS)</h2>
 
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-nginx
+    <pre><span class="c"># For subdomain projects</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-nginx
+<span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--nginx</span> -d projectname.bitsclan.us
+
+<span class="c"># For custom domains</span>
 <span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--nginx</span> -d your_domain.com -d www.your_domain.com</pre>
   </div>
   <p>Certbot will ask for your email and modify your Nginx config automatically.</p>
@@ -2082,7 +2064,7 @@ WantedBy=multi-user.target</pre>
 
 <!-- ====== ROLLBACK (NEW) ====== -->
 <section class="section" id="rollback">
-  <div class="section-label new-section"><span class="line"></span> PART 15 — ADDED</div>
+  <div class="section-label new-section"><span class="line"></span> PART 12 — ADDED</div>
   <h2>Rollback Strategy <span class="added-tag">NEW</span></h2>
   <p>When a deployment breaks production, you need to revert fast. Here's how to roll back for each stack.</p>
 
@@ -2136,7 +2118,7 @@ WantedBy=multi-user.target</pre>
 
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>Permission denied (publickey)</strong> — Check <code>~/.ssh/authorized_keys</code> and permissions (<code>700</code> for <code>.ssh/</code>, <code>600</code> for <code>authorized_keys</code>). Also ensure the VPS has a key added to GitHub (Part 2 Step 4).</div>
+    <div><strong>Permission denied (publickey)</strong> — Check <code>~/.ssh/authorized_keys</code> and permissions (<code>700</code> for <code>.ssh/</code>, <code>600</code> for <code>authorized_keys</code>). Also ensure the VPS has its own SSH key added to GitHub.</div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
@@ -2148,7 +2130,7 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 11.</div>
+    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 9.</div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
@@ -2164,11 +2146,11 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>git pull fails on VPS</strong> — VPS needs its own SSH key added to GitHub. See Part 2, Step 4. For HTTPS repos, switch to SSH: <code>git remote set-url origin git@github.com:youruser/your-repo.git</code></div>
+    <div><strong>git pull fails on VPS</strong> — VPS needs its own SSH key added to GitHub. Generate one on the VPS with <code>ssh-keygen -t ed25519</code> and add the public key to GitHub. For HTTPS repos, switch to SSH: <code>git remote set-url origin git@github.com:youruser/your-repo.git</code></div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>Build killed / out of memory</strong> — Add swap space (Part 5, Step 3). Check with <code>free -h</code>. For Node.js, also try: <code>NODE_OPTIONS="--max-old-space-size=1024" npm run build</code></div>
+    <div><strong>Build killed / out of memory</strong> — Add swap space (Part 3, Step 3). Check with <code>free -h</code>. For Node.js, also try: <code>NODE_OPTIONS="--max-old-space-size=1024" npm run build</code></div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
