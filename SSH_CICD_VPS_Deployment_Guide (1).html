@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSH Key Setup, CI/CD Pipelines & VPS Deployment — Bitsclan IT Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-surface: #161b22;
+    --bg-surface-raised: #1c2333;
+    --bg-code: #0d1117;
+    --border: #30363d;
+    --border-bright: #484f58;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-subtle: #6e7681;
+    --accent: #58a6ff;
+    --accent-glow: rgba(88,166,255,0.15);
+    --green: #3fb950;
+    --green-dim: rgba(63,185,80,0.15);
+    --orange: #d29922;
+    --orange-dim: rgba(210,153,34,0.15);
+    --red: #f85149;
+    --red-dim: rgba(248,81,73,0.15);
+    --purple: #bc8cff;
+    --purple-dim: rgba(188,140,255,0.15);
+    --cyan: #39d2c0;
+    --cyan-dim: rgba(57,210,192,0.12);
+    --brand: #7ac143;
+    --brand-dim: rgba(122,193,67,0.12);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --sidebar-w: 280px;
+    --header-h: 60px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    overflow-x: hidden;
+  }
+
+  /* ========== HEADER ========== */
+  .site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: rgba(13,17,23,0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .site-header .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 18px;
+    color: var(--brand);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .site-header .divider {
+    width: 1px; height: 24px;
+    background: var(--border);
+  }
+  .site-header .doc-title {
+    font-size: 14px; color: var(--text-muted);
+    font-weight: 500;
+  }
+  .hamburger {
+    display: none;
+    background: none; border: none;
+    color: var(--text); cursor: pointer;
+    padding: 4px;
+  }
+  .header-actions {
+    margin-left: auto;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .os-toggle {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .os-toggle button {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .os-toggle button.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+  .back-to-top {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 40px; height: 40px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 18px;
+    z-index: 90;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .back-to-top:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+  .back-to-top.visible { display: flex; }
+
+  /* ========== SIDEBAR ========== */
+  .sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    width: var(--sidebar-w);
+    height: calc(100vh - var(--header-h));
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 0;
+    z-index: 50;
+    transition: transform 0.3s ease;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-section { margin-bottom: 4px; }
+  .sidebar-label {
+    display: block;
+    padding: 8px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-subtle);
+  }
+  .sidebar a {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 20px 7px 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar a:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+  }
+  .sidebar a.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .sidebar a .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    min-width: 20px;
+    color: var(--text-subtle);
+  }
+  .sidebar .new-badge {
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--green-dim);
+    color: var(--green);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: auto;
+    letter-spacing: 0.5px;
+  }
+
+  /* ========== MAIN ========== */
+  .main {
+    margin-left: var(--sidebar-w);
+    margin-top: var(--header-h);
+    min-height: calc(100vh - var(--header-h));
+  }
+  .content {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 40px 120px;
+  }
+
+  /* ========== HERO ========== */
+  .hero {
+    text-align: center;
+    padding: 64px 0 48px;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, var(--brand-dim) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px;
+    background: var(--brand-dim);
+    border: 1px solid rgba(122,193,67,0.25);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand);
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    position: relative;
+    background: linear-gradient(135deg, var(--text) 40%, var(--brand) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 520px;
+    margin: 0 auto 28px;
+    line-height: 1.7;
+  }
+  .hero-frameworks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .framework-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .framework-pill:hover {
+    border-color: var(--border-bright);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
+  .framework-pill .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ========== FLOW OVERVIEW ========== */
+  .flow-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2px;
+    margin: 28px 0;
+    background: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .flow-step {
+    background: var(--bg-surface);
+    padding: 16px 14px;
+    text-align: center;
+    position: relative;
+  }
+  .flow-step .flow-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    opacity: 0.5;
+    margin-bottom: 4px;
+  }
+  .flow-step .flow-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+  .flow-step.new-step { background: var(--green-dim); }
+  .flow-step.new-step .flow-num { color: var(--green); }
+  .flow-step.new-step .flow-label { color: var(--green); }
+
+  /* ========== SECTIONS ========== */
+  .section {
+    margin-bottom: 56px;
+    animation: fadeInUp 0.5s ease both;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .section-label .line {
+    width: 24px; height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+  .section-label.new-section { color: var(--green); }
+  .section-label.new-section .line { background: var(--green); }
+
+  h2 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin-bottom: 8px;
+    line-height: 1.25;
+    scroll-margin-top: 80px;
+  }
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin: 32px 0 12px;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .section > p, .section > ul, .section > ol {
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  ul, ol { padding-left: 24px; }
+  li { margin-bottom: 6px; color: var(--text-muted); }
+  strong { color: var(--text); font-weight: 600; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ========== CODE BLOCKS ========== */
+  .code-block {
+    position: relative;
+    margin: 16px 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg-code);
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--bg-surface-raised);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+  }
+  .code-header .file-icon {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-subtle);
+  }
+  .code-header .file-icon .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  pre::-webkit-scrollbar { height: 6px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  :not(pre) > code {
+    padding: 2px 7px;
+    background: var(--bg-surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--cyan);
+  }
+  .k { color: var(--purple); }
+  .s { color: #a5d6ff; }
+  .c { color: var(--text-subtle); font-style: italic; }
+  .v { color: var(--cyan); }
+  .f { color: #d2a8ff; }
+  .n { color: #ffa657; }
+  .p { color: var(--text-muted); }
+  .cmd { color: var(--green); }
+  .flag { color: var(--orange); }
+  .prompt { color: var(--text-subtle); user-select: none; }
+
+  /* ========== CALLOUTS ========== */
+  .callout {
+    display: flex; gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    margin: 16px 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .callout-icon {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    margin-top: 1px;
+  }
+  .callout.info {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: #a8d1ff;
+  }
+  .callout.info .callout-icon { color: var(--accent); }
+  .callout.warning {
+    background: var(--orange-dim);
+    border-color: var(--orange);
+    color: #e8c87a;
+  }
+  .callout.warning .callout-icon { color: var(--orange); }
+  .callout.danger {
+    background: var(--red-dim);
+    border-color: var(--red);
+    color: #ffa198;
+  }
+  .callout.danger .callout-icon { color: var(--red); }
+  .callout.tip {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: #7ee787;
+  }
+  .callout.tip .callout-icon { color: var(--green); }
+  .callout.new {
+    background: var(--purple-dim);
+    border-color: var(--purple);
+    color: #d4b8ff;
+  }
+  .callout.new .callout-icon { color: var(--purple); }
+  .callout strong { color: inherit; }
+
+  /* ========== TABLE ========== */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--bg-surface-raised);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 12.5px; color: var(--cyan); }
+
+  /* ========== STEP INDICATOR ========== */
+  .step {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 28px;
+  }
+  .step::before {
+    content: attr(data-step);
+    position: absolute;
+    left: 0; top: 2px;
+    width: 26px; height: 26px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .step h3 { margin-top: 0; font-size: 17px; }
+
+  /* ========== PIPELINE CARDS ========== */
+  .pipeline-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 20px 0;
+    transition: border-color 0.2s;
+  }
+  .pipeline-card:hover { border-color: var(--border-bright); }
+  .pipeline-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .pipeline-card-header .fw-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .pipeline-card-header h4 {
+    margin: 0;
+    font-size: 16px;
+    text-transform: none;
+    letter-spacing: -0.2px;
+    color: var(--text);
+  }
+  .pipeline-card-header .lang {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 1px;
+  }
+  .pipeline-card .code-block {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+  .badge.green { background: var(--green-dim); color: var(--green); }
+  .badge.red { background: var(--red-dim); color: var(--red); }
+  .badge.yellow { background: var(--orange-dim); color: var(--orange); }
+  .badge.purple { background: var(--purple-dim); color: var(--purple); }
+
+  /* ========== ADDED TAG ========== */
+  .added-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--green);
+    background: var(--green-dim);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .content { padding: 32px 20px 80px; }
+    .hamburger { display: block; }
+    .hero h1 { font-size: 30px; }
+    h2 { font-size: 24px; }
+    .flow-overview { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: var(--header-h);
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 99;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+    width: 0%;
+    transition: width 0.1s;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <button class="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+  </button>
+  <a class="logo" href="#">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="13" stroke="#7ac143" stroke-width="2"/><path d="M9 14l3 3 7-7" stroke="#7ac143" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Bitsclan
+  </a>
+  <span class="divider"></span>
+  <span class="doc-title">SSH, CI/CD & VPS Deployment Guide</span>
+  <div class="header-actions">
+    <div class="os-toggle">
+      <button class="active" onclick="setOS('all', this)">All</button>
+      <button onclick="setOS('win', this)">Windows</button>
+      <button onclick="setOS('linux', this)">Ubuntu</button>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <span class="sidebar-label">Getting Started</span>
+    <a href="#prerequisites"><span class="num">00</span> Prerequisites</a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">SSH Setup</span>
+    <a href="#part1"><span class="num">01</span> Generate SSH Key</a>
+    <a href="#part1b"><span class="num">02</span> Add Key to GitHub <span class="new-badge">NEW</span></a>
+    <a href="#part2"><span class="num">03</span> Copy Key to VPS</a>
+    <a href="#part3"><span class="num">04</span> Test Connection</a>
+    <a href="#part4"><span class="num">05</span> Secure Server</a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">CI/CD Pipelines</span>
+    <a href="#part5"><span class="num">06</span> Pipeline Setup</a>
+    <a href="#python-pipelines"><span class="num">—</span> Python Pipelines</a>
+    <a href="#js-pipelines"><span class="num">—</span> JavaScript Pipelines</a>
+    <a href="#php-pipelines"><span class="num">—</span> PHP Pipeline</a>
+    <a href="#cicd-final"><span class="num">—</span> Final Steps</a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">Deployment</span>
+    <a href="#part6"><span class="num">07</span> Prepare Server</a>
+    <a href="#part6b"><span class="num">08</span> Setup Database <span class="new-badge">NEW</span></a>
+    <a href="#part7"><span class="num">09</span> Deploy App</a>
+    <a href="#part8"><span class="num">10</span> Keep App Running</a>
+    <a href="#part9"><span class="num">11</span> Nginx Configs</a>
+    <a href="#part9b"><span class="num">12</span> DNS Setup <span class="new-badge">NEW</span></a>
+    <a href="#part10"><span class="num">13</span> SSL (HTTPS)</a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">Reference</span>
+    <a href="#quickref"><span class="num">14</span> Quick Reference</a>
+    <a href="#rollback"><span class="num">15</span> Rollback Strategy <span class="new-badge">NEW</span></a>
+    <a href="#troubleshooting"><span class="num">16</span> Troubleshooting</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+<div class="content">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 1v12M1 7h12"/></svg>
+    Complete Step-by-Step Guide &middot; Enhanced Edition
+  </div>
+  <h1>SSH Key Setup, CI/CD Pipelines<br>& VPS Deployment</h1>
+  <p>Everything you need to go from local development to automated production deployments — with every command for Windows and Ubuntu.</p>
+  <div class="hero-frameworks">
+    <span class="framework-pill"><span class="dot" style="background:#009688"></span> FastAPI</span>
+    <span class="framework-pill"><span class="dot" style="background:#092e20"></span> Django</span>
+    <span class="framework-pill"><span class="dot" style="background:#000"></span> Flask</span>
+    <span class="framework-pill"><span class="dot" style="background:#68a063"></span> Node.js</span>
+    <span class="framework-pill"><span class="dot" style="background:#61dafb"></span> React</span>
+    <span class="framework-pill"><span class="dot" style="background:#000"></span> Next.js</span>
+    <span class="framework-pill"><span class="dot" style="background:#42b883"></span> Vue.js</span>
+    <span class="framework-pill"><span class="dot" style="background:#ff2d20"></span> Laravel</span>
+  </div>
+</div>
+
+<!-- FLOW OVERVIEW -->
+<div class="flow-overview">
+  <div class="flow-step"><div class="flow-num">01</div><div class="flow-label">Generate<br>SSH Key</div></div>
+  <div class="flow-step new-step"><div class="flow-num">02</div><div class="flow-label">Add to<br>GitHub</div></div>
+  <div class="flow-step"><div class="flow-num">03</div><div class="flow-label">Copy to<br>VPS</div></div>
+  <div class="flow-step"><div class="flow-num">04</div><div class="flow-label">Test &<br>Secure</div></div>
+  <div class="flow-step"><div class="flow-num">05</div><div class="flow-label">CI/CD<br>Pipeline</div></div>
+  <div class="flow-step new-step"><div class="flow-num">06</div><div class="flow-label">Database<br>Setup</div></div>
+  <div class="flow-step"><div class="flow-num">07</div><div class="flow-label">Deploy<br>App</div></div>
+  <div class="flow-step new-step"><div class="flow-num">08</div><div class="flow-label">DNS &<br>SSL</div></div>
+</div>
+
+<hr>
+
+<!-- ====== PREREQUISITES ====== -->
+<section class="section" id="prerequisites">
+  <div class="section-label"><span class="line"></span> PREREQUISITES</div>
+  <h2>Find Your Username</h2>
+  <p>Before starting, find your system username. It appears in all file paths throughout this guide.</p>
+
+  <h4>Windows</h4>
+  <p>Open Command Prompt or PowerShell:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Command Prompt / PowerShell</span></div>
+    <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
+DESKTOP-ABC123\youruser
+
+<span class="prompt">$ </span><span class="cmd">echo</span> %USERNAME%
+youruser</pre>
+  </div>
+  <p>SSH keys stored at: <code>C:\Users\youruser\.ssh\</code></p>
+
+  <h4>Ubuntu / Linux</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Terminal</span></div>
+    <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
+youruser
+
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="v">$USER</span>
+youruser</pre>
+  </div>
+  <p>SSH keys stored at: <code>/home/youruser/.ssh/</code></p>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div><strong>NOTE</strong> — Replace <code>youruser</code> with your actual username throughout this entire guide.</div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 1 ====== -->
+<section class="section" id="part1">
+  <div class="section-label"><span class="line"></span> PART 1</div>
+  <h2>Generate SSH Key</h2>
+
+  <div class="step" data-step="1">
+    <h3>Open Your Terminal</h3>
+    <p><strong>Windows:</strong> <code>Win + R</code> → type <code>cmd</code> → Enter, or search <strong>Git Bash</strong></p>
+    <p><strong>Ubuntu:</strong> <code>Ctrl + Alt + T</code> to open terminal</p>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Generate Key Pair</h3>
+    <p>Run on both OS:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"youruser@example.com"</span></pre>
+    </div>
+    <h4>Windows output</h4>
+    <div class="code-block">
+      <pre>Generating public/private ed25519 key pair.
+Enter file in which to save the key (C:\Users\youruser\.ssh\id_ed25519):</pre>
+    </div>
+    <h4>Ubuntu output</h4>
+    <div class="code-block">
+      <pre>Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/youruser/.ssh/id_ed25519):</pre>
+    </div>
+    <p>Press <strong>Enter</strong> to accept the default.</p>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Set Passphrase (Optional)</h3>
+    <div class="code-block">
+      <pre>Enter passphrase (empty for no passphrase):
+Enter same passphrase again:</pre>
+    </div>
+    <p>Type a strong passphrase or press <strong>Enter</strong> to skip.</p>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Verify Key Created</h3>
+    <h4>Windows</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">dir</span> C:\Users\youruser\.ssh\</pre>
+    </div>
+    <h4>Ubuntu</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ls</span> <span class="flag">-la</span> ~/.ssh/</pre>
+    </div>
+    <p><code>id_ed25519</code> — Private key (never share) &nbsp;|&nbsp; <code>id_ed25519.pub</code> — Public key (goes on server)</p>
+  </div>
+
+  <div class="step" data-step="5">
+    <h3>View Public Key</h3>
+    <h4>Windows</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\id_ed25519.pub</pre>
+    </div>
+    <div class="callout tip">
+      <div class="callout-icon">✨</div>
+      <div><strong>TIP</strong> — Copy to clipboard: <code>clip &lt; C:\Users\youruser\.ssh\id_ed25519.pub</code></div>
+    </div>
+    <h4>Ubuntu</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_ed25519.pub</pre>
+    </div>
+    <p>Copy the entire output — you'll need it for both GitHub and your VPS.</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 1B — ADD KEY TO GITHUB (NEW) ====== -->
+<section class="section" id="part1b">
+  <div class="section-label new-section"><span class="line"></span> PART 2 — ADDED</div>
+  <h2>Add SSH Key to GitHub <span class="added-tag">NEW</span></h2>
+  <p>Without this step, your VPS won't be able to <code>git clone</code> or <code>git pull</code> private repositories. Even for public repos, SSH access avoids rate limits and authentication prompts.</p>
+
+  <div class="step" data-step="1">
+    <h3>Copy Your Public Key</h3>
+    <p>If you haven't already, copy the output from Step 5 above.</p>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Add to GitHub</h3>
+    <p>Go to <strong>GitHub.com</strong> → click your avatar → <strong>Settings</strong> → <strong>SSH and GPG keys</strong> → <strong>New SSH key</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Title</td><td>A descriptive name, e.g. <code>My Laptop</code> or <code>Work PC</code></td></tr>
+          <tr><td>Key type</td><td><code>Authentication Key</code></td></tr>
+          <tr><td>Key</td><td>Paste entire public key (starts with <code>ssh-ed25519</code>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Click <strong>Add SSH key</strong> and confirm with your GitHub password.</p>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Test GitHub Connection</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-T</span> git@github.com</pre>
+    </div>
+    <p>Expected output:</p>
+    <div class="code-block">
+      <pre>Hi youruser! You've successfully authenticated, but GitHub does
+not provide shell access.</pre>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div><strong>FIRST TIME?</strong> — If asked "Are you sure you want to continue connecting?", type <code>yes</code> and press Enter. This adds GitHub to your known hosts.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Also Add a Key on Your VPS</h3>
+    <p>Your VPS also needs to authenticate with GitHub to run <code>git pull</code>. SSH into your VPS and generate a <strong>separate</strong> key pair there:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"vps-server"</span>
+<span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_ed25519.pub</pre>
+    </div>
+    <p>Add this VPS public key to GitHub the same way (Settings → SSH keys). Name it something like <code>VPS Production Server</code>.</p>
+    <p>Test from VPS:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> <span class="flag">-T</span> git@github.com</pre>
+    </div>
+    <div class="callout danger">
+      <div class="callout-icon">🚨</div>
+      <div><strong>CRITICAL</strong> — Without this, every <code>git pull</code> in your CI/CD deploy script will fail with "Permission denied (publickey)" on private repos.</div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 2 ====== -->
+<section class="section" id="part2">
+  <div class="section-label"><span class="line"></span> PART 3</div>
+  <h2>Copy Public Key to VPS</h2>
+
+  <h3>Method A: ssh-copy-id (Easiest)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Ubuntu / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">ssh-copy-id</span> youruser@your_server_ip</pre>
+  </div>
+  <p>Asks for server password one last time, then installs the key.</p>
+
+  <h3>Method B: Manual Copy</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">ssh</span> youruser@your_server_ip
+<span class="prompt">$ </span><span class="cmd">mkdir</span> <span class="flag">-p</span> ~/.ssh
+<span class="prompt">$ </span><span class="cmd">chmod</span> 700 ~/.ssh
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">"PASTE_YOUR_PUBLIC_KEY_HERE"</span> >> ~/.ssh/authorized_keys
+<span class="prompt">$ </span><span class="cmd">chmod</span> 600 ~/.ssh/authorized_keys
+<span class="prompt">$ </span><span class="cmd">exit</span></pre>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">✨</div>
+    <div><strong>TIP</strong> — Replace <code>PASTE_YOUR_PUBLIC_KEY_HERE</code> with output from Step 5.</div>
+  </div>
+
+  <h4>Windows PowerShell one-liner</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\id_ed25519.pub | <span class="cmd">ssh</span> youruser@your_server_ip <span class="s">"mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"</span></pre>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 3 ====== -->
+<section class="section" id="part3">
+  <div class="section-label"><span class="line"></span> PART 4</div>
+  <h2>Test SSH Connection</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">ssh</span> youruser@your_server_ip
+Welcome to Ubuntu 24.04 LTS
+Last login: Tue Mar 03 12:00:00 2026</pre>
+  </div>
+  <p>You should connect <strong>without a password prompt</strong>.</p>
+
+  <h3>SSH Alias (Optional)</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <span class="file-icon"><span class="dot" style="background:var(--orange)"></span> ~/.ssh/config</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><span class="k">Host</span> myserver
+    <span class="k">HostName</span> your_server_ip
+    <span class="k">User</span> youruser
+    <span class="k">Port</span> <span class="n">22</span>
+    <span class="k">IdentityFile</span> ~/.ssh/id_ed25519</pre>
+  </div>
+  <p>Now connect with: <code>ssh myserver</code></p>
+</section>
+
+<hr>
+
+<!-- ====== PART 4 ====== -->
+<section class="section" id="part4">
+  <div class="section-label"><span class="line"></span> PART 5</div>
+  <h2>Secure the Server</h2>
+  <p>Run these commands <strong>on your VPS server</strong>.</p>
+
+  <div class="step" data-step="1">
+    <h3>Create a Non-Root User <span class="added-tag">NEW</span></h3>
+    <p>If your VPS provider gave you only root access, create a dedicated deploy user first:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server (as root)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt"># </span><span class="cmd">adduser</span> youruser
+<span class="prompt"># </span><span class="cmd">usermod</span> <span class="flag">-aG</span> sudo youruser
+<span class="prompt"># </span><span class="cmd">rsync</span> <span class="flag">--archive --chown=</span>youruser:youruser ~/.ssh /home/youruser
+<span class="prompt"># </span><span class="cmd">exit</span></pre>
+    </div>
+    <p>Now SSH in as the new user: <code>ssh youruser@your_server_ip</code></p>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Update System</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt update && <span class="cmd">sudo</span> apt upgrade <span class="flag">-y</span></pre>
+    </div>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Add Swap Space <span class="added-tag">NEW</span></h3>
+    <p>Small VPS instances (1–2 GB RAM) can run out of memory during <code>npm run build</code> or <code>composer install</code>. Adding swap prevents crashes:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">sudo</span> fallocate <span class="flag">-l</span> 2G /swapfile
+<span class="prompt">$ </span><span class="cmd">sudo</span> chmod 600 /swapfile
+<span class="prompt">$ </span><span class="cmd">sudo</span> mkswap /swapfile
+<span class="prompt">$ </span><span class="cmd">sudo</span> swapon /swapfile
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">'/swapfile none swap sw 0 0'</span> | <span class="cmd">sudo</span> tee <span class="flag">-a</span> /etc/fstab</pre>
+    </div>
+    <p>Verify with <code>free -h</code> — you should see 2 GB swap.</p>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Disable Password Authentication</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">sudo</span> nano /etc/ssh/sshd_config</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/ssh/sshd_config</span></div>
+      <pre><span class="k">PasswordAuthentication</span> no
+<span class="k">PubkeyAuthentication</span> yes
+<span class="k">PermitRootLogin</span> no</pre>
+    </div>
+  </div>
+
+  <div class="step" data-step="5">
+    <h3>Restart SSH</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">sudo</span> systemctl restart sshd</pre>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div><strong>WARNING</strong> — Keep your current session open. Test from a <strong>NEW</strong> terminal first!</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="6">
+    <h3>Firewall</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">sudo</span> ufw allow OpenSSH
+<span class="prompt">$ </span><span class="cmd">sudo</span> ufw enable
+<span class="prompt">$ </span><span class="cmd">sudo</span> ufw status
+Status: active
+To           Action   From
+OpenSSH      ALLOW    Anywhere</pre>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 5 — CI/CD ====== -->
+<section class="section" id="part5">
+  <div class="section-label"><span class="line"></span> PART 6</div>
+  <h2>CI/CD Pipeline Setup</h2>
+  <p>Using <strong>GitHub Actions</strong> — every push to <code>main</code> triggers automatic testing and deployment to your VPS.</p>
+
+  <div class="step" data-step="1">
+    <h3>Generate Deploy Key</h3>
+    <h4>Ubuntu</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> ~/.ssh/deploy_key</pre>
+    </div>
+    <h4>Windows</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> C:\Users\youruser\.ssh\deploy_key</pre>
+    </div>
+    <p>Press <strong>Enter</strong> for no passphrase (required for automation).</p>
+    <p><code>deploy_key</code> → Private key → GitHub Secrets &nbsp;|&nbsp; <code>deploy_key.pub</code> → Public key → VPS server</p>
+    <div class="callout danger">
+      <div class="callout-icon">🚨</div>
+      <div><strong>IMPORTANT</strong> — Never commit the private key to your repository.</div>
+    </div>
+
+    <div class="callout new">
+      <div class="callout-icon">💡</div>
+      <div><strong>UNDERSTANDING THE KEY FLOW</strong> — This deploy key lets GitHub Actions SSH <em>into</em> your VPS. It is <strong>separate</strong> from the VPS's own SSH key (Part 2 Step 4) which lets your VPS pull code <em>from</em> GitHub. You need both.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Add Public Key to VPS</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">ssh</span> youruser@your_server_ip
+<span class="prompt">$ </span><span class="cmd">echo</span> <span class="s">"PASTE_DEPLOY_KEY_PUB"</span> >> ~/.ssh/authorized_keys
+<span class="prompt">$ </span><span class="cmd">exit</span></pre>
+    </div>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Copy Private Key</h3>
+    <h4>Ubuntu</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/deploy_key</pre>
+    </div>
+    <h4>Windows</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\deploy_key</pre>
+    </div>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div><strong>WARNING</strong> — Copy the <strong>ENTIRE</strong> output including BEGIN/END lines.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Add GitHub Secrets</h3>
+    <p>Go to your repo → <strong>Settings</strong> → <strong>Secrets and variables</strong> → <strong>Actions</strong>:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Secret Name</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><code>VPS_SSH_KEY</code></td><td>Entire private key (with BEGIN/END lines)</td></tr>
+          <tr><td><code>VPS_HOST</code></td><td>Server IP, e.g. <code>203.0.113.50</code></td></tr>
+          <tr><td><code>VPS_USER</code></td><td>Server username, e.g. <code>youruser</code></td></tr>
+          <tr><td><code>VPS_PORT</code></td><td>SSH port, usually <code>22</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div><strong>NOTE</strong> — Secrets are encrypted and never visible in workflow logs.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="5">
+    <h3>Create Workflow Directory</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Ubuntu</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cd</span> ~/your-repo
+<span class="prompt">$ </span><span class="cmd">mkdir</span> <span class="flag">-p</span> .github/workflows</pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Windows</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">cd</span> C:\Users\youruser\your-repo
+<span class="prompt">$ </span><span class="cmd">mkdir</span> .github\workflows</pre>
+    </div>
+  </div>
+
+  <div class="step" data-step="6">
+    <h3>Create Workflow File</h3>
+    <p>Choose the pipeline matching your framework below.</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PYTHON PIPELINES ====== -->
+<section class="section" id="python-pipelines">
+  <div class="section-label"><span class="line"></span> CI/CD PIPELINES</div>
+  <h2>Python Pipelines</h2>
+
+  <!-- FastAPI -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(0,150,136,0.15); color:#009688">⚡</div>
+      <div><h4>FastAPI</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy FastAPI to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-python@v5
+        <span class="k">with:</span>
+          <span class="k">python-version:</span> <span class="s">'3.12'</span>
+          <span class="k">cache:</span> <span class="s">'pip'</span>
+      - <span class="k">run:</span> |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - <span class="k">run:</span> pip install ruff && ruff check .
+      - <span class="k">run:</span> python -m pytest tests/ -v
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            cd /home/youruser/your-repo
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart fastapi-app</pre>
+    </div>
+  </div>
+
+  <!-- Django -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(9,46,32,0.3); color:#44b78b">D</div>
+      <div><h4>Django</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Django to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">services:</span>
+      <span class="k">postgres:</span>
+        <span class="k">image:</span> postgres:16
+        <span class="k">env:</span>
+          <span class="k">POSTGRES_DB:</span> testdb
+          <span class="k">POSTGRES_USER:</span> testuser
+          <span class="k">POSTGRES_PASSWORD:</span> testpass
+        <span class="k">ports:</span> [<span class="s">'5432:5432'</span>]
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-python@v5
+        <span class="k">with:</span>
+          <span class="k">python-version:</span> <span class="s">'3.12'</span>
+          <span class="k">cache:</span> <span class="s">'pip'</span>
+      - <span class="k">run:</span> pip install -r requirements.txt
+      - <span class="k">run:</span> python manage.py migrate
+        <span class="k">env:</span>
+          <span class="k">DATABASE_URL:</span> postgres://testuser:testpass@localhost:5432/testdb
+      - <span class="k">run:</span> python manage.py test --verbosity=2
+        <span class="k">env:</span>
+          <span class="k">DATABASE_URL:</span> postgres://testuser:testpass@localhost:5432/testdb
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            cd /home/youruser/your-repo
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+            sudo systemctl restart gunicorn</pre>
+    </div>
+  </div>
+
+  <!-- Flask -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(255,255,255,0.06); color:#aaa">F</div>
+      <div><h4>Flask</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Flask to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-python@v5
+        <span class="k">with:</span>
+          <span class="k">python-version:</span> <span class="s">'3.12'</span>
+          <span class="k">cache:</span> <span class="s">'pip'</span>
+      - <span class="k">run:</span> pip install -r requirements.txt
+      - <span class="k">run:</span> python -m pytest tests/ -v
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            cd /home/youruser/your-repo
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart flask-app</pre>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== JS PIPELINES ====== -->
+<section class="section" id="js-pipelines">
+  <div class="section-label"><span class="line"></span> CI/CD PIPELINES</div>
+  <h2>JavaScript Pipelines</h2>
+
+  <!-- Node.js -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(104,160,99,0.15); color:#68a063">N</div>
+      <div><h4>Node.js (Express)</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Node.js to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-node@v4
+        <span class="k">with:</span>
+          <span class="k">node-version:</span> <span class="s">'20'</span>
+          <span class="k">cache:</span> <span class="s">'npm'</span>
+      - <span class="k">run:</span> npm ci
+      - <span class="k">run:</span> npm run lint --if-present
+      - <span class="k">run:</span> npm test --if-present
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            export NVM_DIR="$HOME/.nvm"
+            source "$NVM_DIR/nvm.sh"
+            cd /home/youruser/your-repo
+            git pull origin main
+            npm ci --production
+            pm2 restart myapp</pre>
+    </div>
+  </div>
+
+  <!-- React -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(97,218,251,0.12); color:#61dafb">R</div>
+      <div><h4>React.js</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy React to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">build-deploy:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-node@v4
+        <span class="k">with:</span>
+          <span class="k">node-version:</span> <span class="s">'20'</span>
+          <span class="k">cache:</span> <span class="s">'npm'</span>
+      - <span class="k">run:</span> npm ci
+      - <span class="k">run:</span> npm test -- --watchAll=false --if-present
+      - <span class="k">run:</span> npm run build
+
+      - <span class="k">uses:</span> appleboy/scp-action@v0.1.7
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">source:</span> <span class="s">'dist/*'</span>
+          <span class="k">target:</span> <span class="s">'/var/www/your-react-app/'</span>
+          <span class="k">strip_components:</span> <span class="n">1</span>
+
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> sudo systemctl reload nginx</pre>
+    </div>
+  </div>
+
+  <!-- Next.js -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(255,255,255,0.06); color:#fff">▲</div>
+      <div><h4>Next.js</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Next.js to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-node@v4
+        <span class="k">with:</span>
+          <span class="k">node-version:</span> <span class="s">'20'</span>
+          <span class="k">cache:</span> <span class="s">'npm'</span>
+      - <span class="k">run:</span> npm ci
+      - <span class="k">run:</span> npm run lint
+      - <span class="k">run:</span> npm run build
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            export NVM_DIR="$HOME/.nvm"
+            source "$NVM_DIR/nvm.sh"
+            cd /home/youruser/your-repo
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart next-app</pre>
+    </div>
+  </div>
+
+  <!-- Vue.js -->
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(66,184,131,0.15); color:#42b883">V</div>
+      <div><h4>Vue.js</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Vue.js to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">build-deploy:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> actions/setup-node@v4
+        <span class="k">with:</span>
+          <span class="k">node-version:</span> <span class="s">'20'</span>
+          <span class="k">cache:</span> <span class="s">'npm'</span>
+      - <span class="k">run:</span> npm ci
+      - <span class="k">run:</span> npm run test:unit --if-present
+      - <span class="k">run:</span> npm run build
+
+      - <span class="k">uses:</span> appleboy/scp-action@v0.1.7
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">source:</span> <span class="s">'dist/*'</span>
+          <span class="k">target:</span> <span class="s">'/var/www/your-vue-app/'</span>
+          <span class="k">strip_components:</span> <span class="n">1</span>
+
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> sudo systemctl reload nginx</pre>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PHP PIPELINE ====== -->
+<section class="section" id="php-pipelines">
+  <div class="section-label"><span class="line"></span> CI/CD PIPELINES</div>
+  <h2>PHP Pipeline</h2>
+
+  <div class="pipeline-card">
+    <div class="pipeline-card-header">
+      <div class="fw-icon" style="background:rgba(255,45,32,0.12); color:#ff2d20">L</div>
+      <div><h4>Laravel</h4><div class="lang">deploy.yml</div></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--green)"></span> .github/workflows/deploy.yml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="k">name:</span> Deploy Laravel to VPS
+
+<span class="k">on:</span>
+  <span class="k">push:</span>
+    <span class="k">branches:</span> [ main ]
+
+<span class="k">jobs:</span>
+  <span class="k">test:</span>
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">services:</span>
+      <span class="k">mysql:</span>
+        <span class="k">image:</span> mysql:8.0
+        <span class="k">env:</span>
+          <span class="k">MYSQL_ROOT_PASSWORD:</span> password
+          <span class="k">MYSQL_DATABASE:</span> testing
+        <span class="k">ports:</span> [<span class="s">'3306:3306'</span>]
+        <span class="k">options:</span> --health-cmd="mysqladmin ping" --health-interval=10s
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> actions/checkout@v4
+      - <span class="k">uses:</span> shivammathur/setup-php@v2
+        <span class="k">with:</span>
+          <span class="k">php-version:</span> <span class="s">'8.3'</span>
+          <span class="k">extensions:</span> mbstring,pdo_mysql,bcmath
+      - <span class="k">run:</span> composer install --no-interaction --prefer-dist
+      - <span class="k">run:</span> cp .env.example .env && php artisan key:generate
+      - <span class="k">run:</span> php artisan migrate --force
+        <span class="k">env:</span>
+          <span class="k">DB_HOST:</span> 127.0.0.1
+          <span class="k">DB_DATABASE:</span> testing
+          <span class="k">DB_USERNAME:</span> root
+          <span class="k">DB_PASSWORD:</span> password
+      - <span class="k">run:</span> php artisan test --parallel
+        <span class="k">env:</span>
+          <span class="k">DB_HOST:</span> 127.0.0.1
+          <span class="k">DB_DATABASE:</span> testing
+          <span class="k">DB_USERNAME:</span> root
+          <span class="k">DB_PASSWORD:</span> password
+
+  <span class="k">deploy:</span>
+    <span class="k">needs:</span> test
+    <span class="k">runs-on:</span> ubuntu-latest
+    <span class="k">if:</span> github.ref == 'refs/heads/main'
+    <span class="k">steps:</span>
+      - <span class="k">uses:</span> appleboy/ssh-action@v1
+        <span class="k">with:</span>
+          <span class="k">host:</span> ${{ secrets.VPS_HOST }}
+          <span class="k">username:</span> ${{ secrets.VPS_USER }}
+          <span class="k">key:</span> ${{ secrets.VPS_SSH_KEY }}
+          <span class="k">port:</span> ${{ secrets.VPS_PORT }}
+          <span class="k">script:</span> |
+            cd /home/youruser/your-repo
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            sudo systemctl restart php8.3-fpm</pre>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== CI/CD FINAL ====== -->
+<section class="section" id="cicd-final">
+  <div class="section-label"><span class="line"></span> CI/CD</div>
+  <h2>Final Steps</h2>
+
+  <div class="step" data-step="7">
+    <h3>Commit and Push</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">git</span> add .github/workflows/deploy.yml
+<span class="prompt">$ </span><span class="cmd">git</span> commit <span class="flag">-m</span> <span class="s">"Add CI/CD pipeline"</span>
+<span class="prompt">$ </span><span class="cmd">git</span> push origin main</pre>
+    </div>
+    <p>This push triggers your first pipeline run.</p>
+  </div>
+
+  <div class="step" data-step="8">
+    <h3>Monitor</h3>
+    <p>Go to <code>github.com/youruser/your-repo/actions</code></p>
+    <p><span class="badge green">✅ Green</span> Passed &nbsp;&nbsp; <span class="badge red">❌ Red</span> Failed (click for logs) &nbsp;&nbsp; <span class="badge yellow">🟡 Yellow</span> Running</p>
+  </div>
+
+  <div class="step" data-step="9">
+    <h3>Status Badge (Optional)</h3>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">README.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>![Deploy](https://github.com/youruser/your-repo/actions/workflows/deploy.yml/badge.svg)</pre>
+    </div>
+  </div>
+
+  <div class="step" data-step="10">
+    <h3>Branch Protection (Recommended)</h3>
+    <p><strong>Settings</strong> → <strong>Branches</strong> → <strong>Add rule</strong> for <code>main</code>. Enable "Require status checks to pass" and "Require pull request reviews".</p>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 6 — PREPARE SERVER ====== -->
+<section class="section" id="part6">
+  <div class="section-label"><span class="line"></span> PART 7</div>
+  <h2>Prepare Server</h2>
+  <p>Install dependencies <strong>on your VPS server</strong>.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server — Base packages</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> git curl wget unzip build-essential</pre>
+  </div>
+
+  <h3>Node.js</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">curl</span> -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+<span class="prompt">$ </span><span class="cmd">source</span> ~/.bashrc
+<span class="prompt">$ </span><span class="cmd">nvm</span> install --lts</pre>
+  </div>
+
+  <h3>Python</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> python3 python3-pip python3-venv</pre>
+  </div>
+
+  <h3>PHP (Laravel)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> php8.3 php8.3-fpm php8.3-mbstring php8.3-xml php8.3-mysql php8.3-curl php8.3-zip
+<span class="prompt">$ </span><span class="cmd">curl</span> -sS https://getcomposer.org/installer | php
+<span class="prompt">$ </span><span class="cmd">sudo</span> mv composer.phar /usr/local/bin/composer</pre>
+  </div>
+
+  <h3>Nginx</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> nginx
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl enable nginx
+<span class="prompt">$ </span><span class="cmd">sudo</span> ufw allow <span class="s">'Nginx Full'</span></pre>
+  </div>
+
+  <div class="callout new">
+    <div class="callout-icon">💡</div>
+    <div><strong>CLEAN UP DEFAULT SITE</strong> — Remove the default Nginx page to avoid conflicts:<br>
+    <code>sudo rm /etc/nginx/sites-enabled/default</code></div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 6B — DATABASE SETUP (NEW) ====== -->
+<section class="section" id="part6b">
+  <div class="section-label new-section"><span class="line"></span> PART 8 — ADDED</div>
+  <h2>Setup Database <span class="added-tag">NEW</span></h2>
+  <p>The CI/CD pipelines use test databases in GitHub Actions, but your VPS needs a real production database.</p>
+
+  <h3>PostgreSQL (Django / FastAPI)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> postgresql postgresql-contrib
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl enable postgresql
+<span class="prompt">$ </span><span class="cmd">sudo</span> <span class="flag">-u</span> postgres psql</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">PostgreSQL Shell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">CREATE USER</span> youruser <span class="k">WITH PASSWORD</span> <span class="s">'strong_password_here'</span>;
+<span class="k">CREATE DATABASE</span> yourapp_db <span class="k">OWNER</span> youruser;
+<span class="k">GRANT ALL PRIVILEGES ON DATABASE</span> yourapp_db <span class="k">TO</span> youruser;
+<span class="k">\q</span></pre>
+  </div>
+  <p>Your <code>DATABASE_URL</code>: <code>postgres://youruser:strong_password_here@localhost:5432/yourapp_db</code></p>
+
+  <h3>MySQL (Laravel)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> mysql-server
+<span class="prompt">$ </span><span class="cmd">sudo</span> mysql_secure_installation
+<span class="prompt">$ </span><span class="cmd">sudo</span> mysql</pre>
+  </div>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">MySQL Shell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">CREATE DATABASE</span> yourapp_db;
+<span class="k">CREATE USER</span> <span class="s">'youruser'</span>@<span class="s">'localhost'</span> <span class="k">IDENTIFIED BY</span> <span class="s">'strong_password_here'</span>;
+<span class="k">GRANT ALL PRIVILEGES ON</span> yourapp_db.* <span class="k">TO</span> <span class="s">'youruser'</span>@<span class="s">'localhost'</span>;
+<span class="k">FLUSH PRIVILEGES</span>;
+<span class="k">EXIT</span>;</pre>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>SECURITY</strong> — Use a password generator for production. Never reuse your system or GitHub password for the database.</div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 7 — DEPLOY ====== -->
+<section class="section" id="part7">
+  <div class="section-label"><span class="line"></span> PART 9</div>
+  <h2>Deploy Application</h2>
+
+  <div class="callout new">
+    <div class="callout-icon">💡</div>
+    <div><strong>USE SSH URL, NOT HTTPS</strong> — For private repos, clone with the SSH URL so your VPS key handles auth:<br>
+    <code>git clone git@github.com:youruser/your-repo.git</code><br>
+    Not: <code>https://github.com/youruser/your-repo.git</code></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server — Clone repo</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">cd</span> /home/youruser
+<span class="prompt">$ </span><span class="cmd">git</span> clone git@github.com:youruser/your-repo.git
+<span class="prompt">$ </span><span class="cmd">cd</span> your-repo</pre>
+  </div>
+
+  <h3>Node.js</h3>
+  <div class="code-block"><pre><span class="prompt">$ </span><span class="cmd">npm</span> install</pre></div>
+
+  <h3>Python</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">python3</span> -m venv venv
+<span class="prompt">$ </span><span class="cmd">source</span> venv/bin/activate
+<span class="prompt">$ </span><span class="cmd">pip</span> install -r requirements.txt</pre>
+  </div>
+
+  <h3>Laravel</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">composer</span> install --no-dev --optimize-autoloader
+<span class="prompt">$ </span><span class="cmd">cp</span> .env.example .env
+<span class="prompt">$ </span><span class="cmd">php</span> artisan key:generate</pre>
+  </div>
+
+  <h3>Environment Variables</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> .env</span></div>
+    <pre><span class="v">PORT</span>=3000
+<span class="v">NODE_ENV</span>=production
+<span class="v">DATABASE_URL</span>=your_database_url
+<span class="v">SECRET_KEY</span>=your_secret_key</pre>
+  </div>
+
+  <div class="callout new">
+    <div class="callout-icon">🔒</div>
+    <div><strong>SECURE YOUR .env FILE</strong> — Restrict read permissions and ensure it's in <code>.gitignore</code>:<br>
+    <code>chmod 600 .env</code><br>
+    <code>echo ".env" >> .gitignore</code></div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 8 — KEEP RUNNING ====== -->
+<section class="section" id="part8">
+  <div class="section-label"><span class="line"></span> PART 10</div>
+  <h2>Keep App Running</h2>
+
+  <h3>PM2 (Node.js / Next.js)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">npm</span> install <span class="flag">-g</span> pm2
+<span class="prompt">$ </span><span class="cmd">pm2</span> start app.js <span class="flag">--name</span> <span class="s">"myapp"</span>
+<span class="prompt">$ </span><span class="cmd">pm2</span> save
+<span class="prompt">$ </span><span class="cmd">pm2</span> startup</pre>
+  </div>
+
+  <div class="callout new">
+    <div class="callout-icon">💡</div>
+    <div><strong>PM2 ECOSYSTEM FILE (Next.js)</strong> — For Next.js, use an ecosystem config instead of <code>app.js</code>:<br>
+    Create <code>ecosystem.config.js</code>:<br><br>
+    <code>module.exports = { apps: [{ name: "next-app", script: "node_modules/.bin/next", args: "start", env: { PORT: 3000, NODE_ENV: "production" }}]}</code><br><br>
+    Then: <code>pm2 start ecosystem.config.js</code></div>
+  </div>
+
+  <h4>PM2 Log Management <span class="added-tag">NEW</span></h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">pm2</span> install pm2-logrotate
+<span class="prompt">$ </span><span class="cmd">pm2</span> set pm2-logrotate:max_size 10M
+<span class="prompt">$ </span><span class="cmd">pm2</span> set pm2-logrotate:retain 7</pre>
+  </div>
+
+  <h3>systemd (Python / PHP)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/systemd/system/myapp.service</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">[Unit]</span>
+Description=My Application
+After=network.target
+
+<span class="k">[Service]</span>
+User=youruser
+WorkingDirectory=/home/youruser/your-repo
+ExecStart=/usr/bin/node app.js
+<span class="c"># FastAPI: /home/youruser/your-repo/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000</span>
+<span class="c"># Django:  /home/youruser/your-repo/venv/bin/gunicorn project.wsgi -b 0.0.0.0:8000</span>
+<span class="c"># Flask:   /home/youruser/your-repo/venv/bin/gunicorn app:app -b 0.0.0.0:5000</span>
+Restart=always
+EnvironmentFile=/home/youruser/your-repo/.env
+
+<span class="k">[Install]</span>
+WantedBy=multi-user.target</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> systemctl daemon-reload
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl start myapp
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl enable myapp</pre>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 9 — NGINX (EXPANDED) ====== -->
+<section class="section" id="part9">
+  <div class="section-label"><span class="line"></span> PART 11</div>
+  <h2>Nginx Configurations</h2>
+  <p>Different frameworks need different Nginx configs. Pick the one that matches your stack.</p>
+
+  <h3>Reverse Proxy — Node.js / FastAPI / Django / Flask</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/myapp</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">server</span> {
+    <span class="k">listen</span> <span class="n">80</span>;
+    <span class="k">server_name</span> your_domain.com your_server_ip;
+
+    <span class="k">location</span> / {
+        <span class="k">proxy_pass</span>         http://localhost:<span class="n">3000</span>;
+        <span class="k">proxy_http_version</span> <span class="n">1.1</span>;
+        <span class="k">proxy_set_header</span>   Upgrade $http_upgrade;
+        <span class="k">proxy_set_header</span>   Connection <span class="s">'upgrade'</span>;
+        <span class="k">proxy_set_header</span>   Host $host;
+        <span class="k">proxy_set_header</span>   X-Real-IP $remote_addr;
+        <span class="k">proxy_set_header</span>   X-Forwarded-For $proxy_add_x_forwarded_for;
+        <span class="k">proxy_cache_bypass</span> $http_upgrade;
+    }
+}</pre>
+  </div>
+  <div class="callout tip">
+    <div class="callout-icon">✨</div>
+    <div><strong>PORT MAP</strong> — Change <code>3000</code> to: <code>8000</code> (FastAPI/Django), <code>5000</code> (Flask), <code>3000</code> (Node.js/Next.js).</div>
+  </div>
+
+  <h3>Static Site — React / Vue <span class="added-tag">NEW</span></h3>
+  <p>React and Vue build to static files. They don't need a proxy — Nginx serves them directly:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/my-react-app</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">server</span> {
+    <span class="k">listen</span> <span class="n">80</span>;
+    <span class="k">server_name</span> your_domain.com;
+
+    <span class="k">root</span> /var/www/your-react-app;
+    <span class="k">index</span> index.html;
+
+    <span class="c"># Handle client-side routing (React Router / Vue Router)</span>
+    <span class="k">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ /index.html;
+    }
+
+    <span class="c"># Cache static assets</span>
+    <span class="k">location</span> ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        <span class="k">expires</span> 1y;
+        <span class="k">add_header</span> Cache-Control <span class="s">"public, immutable"</span>;
+    }
+}</pre>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>CRITICAL</strong> — The <code>try_files</code> directive is essential for single-page apps. Without it, refreshing any non-root URL (e.g. <code>/about</code>) returns a 404.</div>
+  </div>
+
+  <h3>PHP-FPM — Laravel <span class="added-tag">NEW</span></h3>
+  <p>Laravel uses PHP-FPM, not a Node-style proxy:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/laravel-app</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">server</span> {
+    <span class="k">listen</span> <span class="n">80</span>;
+    <span class="k">server_name</span> your_domain.com;
+
+    <span class="k">root</span> /home/youruser/your-repo/public;
+    <span class="k">index</span> index.php index.html;
+
+    <span class="k">location</span> / {
+        <span class="k">try_files</span> $uri $uri/ /index.php?$query_string;
+    }
+
+    <span class="k">location</span> ~ \.php$ {
+        <span class="k">fastcgi_pass</span> unix:/run/php/php8.3-fpm.sock;
+        <span class="k">fastcgi_param</span> SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        <span class="k">include</span> fastcgi_params;
+    }
+
+    <span class="k">location</span> ~ /\.ht {
+        <span class="k">deny</span> all;
+    }
+}</pre>
+  </div>
+
+  <h3>Enable Your Site</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
+<span class="prompt">$ </span><span class="cmd">sudo</span> rm <span class="flag">-f</span> /etc/nginx/sites-enabled/default  <span class="c"># Remove default site</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> nginx -t
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl restart nginx</pre>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 9B — DNS SETUP (NEW) ====== -->
+<section class="section" id="part9b">
+  <div class="section-label new-section"><span class="line"></span> PART 12 — ADDED</div>
+  <h2>DNS Setup <span class="added-tag">NEW</span></h2>
+  <p>Before you can get an SSL certificate, your domain must point to your VPS. Log into your domain registrar (Namecheap, GoDaddy, Cloudflare, etc.).</p>
+
+  <h3>Required DNS Records</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr></thead>
+      <tbody>
+        <tr><td><code>A</code></td><td><code>@</code></td><td><code>your_server_ip</code></td><td>300</td></tr>
+        <tr><td><code>A</code></td><td><code>www</code></td><td><code>your_server_ip</code></td><td>300</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Verify DNS Propagation</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">dig</span> +short your_domain.com
+203.0.113.50
+
+<span class="prompt">$ </span><span class="cmd">dig</span> +short www.your_domain.com
+203.0.113.50</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div><strong>PROPAGATION TIME</strong> — DNS changes can take 5 minutes to 48 hours. Use <a href="https://dnschecker.org" target="_blank" rel="noopener">dnschecker.org</a> to check worldwide propagation. Wait until DNS resolves correctly before running Certbot.</div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 10 — SSL ====== -->
+<section class="section" id="part10">
+  <div class="section-label"><span class="line"></span> PART 13</div>
+  <h2>SSL (HTTPS)</h2>
+
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-nginx
+<span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--nginx</span> -d your_domain.com -d www.your_domain.com</pre>
+  </div>
+  <p>Certbot will ask for your email and modify your Nginx config automatically.</p>
+
+  <h3>Verify Auto-Renewal <span class="added-tag">NEW</span></h3>
+  <p>Let's Encrypt certificates expire every 90 days. Certbot installs a systemd timer that auto-renews, but verify it's active:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> certbot renew <span class="flag">--dry-run</span>            <span class="c"># Test renewal</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl status certbot.timer      <span class="c"># Verify timer is active</span></pre>
+  </div>
+  <p>If the timer isn't active, add a manual cron job:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> crontab -e
+<span class="c"># Add this line:</span>
+0 3 * * * certbot renew --quiet --post-hook "systemctl reload nginx"</pre>
+  </div>
+
+  <p>Your site is now live at <code>https://your_domain.com</code> 🎉</p>
+</section>
+
+<hr>
+
+<!-- ====== QUICK REFERENCE ====== -->
+<section class="section" id="quickref">
+  <div class="section-label"><span class="line"></span> REFERENCE</div>
+  <h2>Quick Reference</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Task</th><th>Command</th></tr></thead>
+      <tbody>
+        <tr><td>Connect</td><td><code>ssh myserver</code></td></tr>
+        <tr><td>App status (PM2)</td><td><code>pm2 status</code></td></tr>
+        <tr><td>App status (systemd)</td><td><code>sudo systemctl status myapp</code></td></tr>
+        <tr><td>Logs (PM2)</td><td><code>pm2 logs myapp</code></td></tr>
+        <tr><td>Logs (systemd)</td><td><code>sudo journalctl -u myapp -f</code></td></tr>
+        <tr><td>Restart (PM2)</td><td><code>pm2 restart myapp</code></td></tr>
+        <tr><td>Restart (systemd)</td><td><code>sudo systemctl restart myapp</code></td></tr>
+        <tr><td>Restart Nginx</td><td><code>sudo systemctl restart nginx</code></td></tr>
+        <tr><td>Renew SSL</td><td><code>sudo certbot renew</code></td></tr>
+        <tr><td>Check disk space</td><td><code>df -h</code></td></tr>
+        <tr><td>Check memory</td><td><code>free -h</code></td></tr>
+        <tr><td>Redeploy (Node)</td><td><code>git pull && npm ci && pm2 restart myapp</code></td></tr>
+        <tr><td>Redeploy (Python)</td><td><code>git pull && pip install -r requirements.txt && sudo systemctl restart myapp</code></td></tr>
+        <tr><td>Redeploy (Laravel)</td><td><code>git pull && composer install --no-dev && php artisan migrate --force</code></td></tr>
+        <tr><td>CI/CD runs</td><td><code>github.com/youruser/your-repo/actions</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== ROLLBACK (NEW) ====== -->
+<section class="section" id="rollback">
+  <div class="section-label new-section"><span class="line"></span> PART 15 — ADDED</div>
+  <h2>Rollback Strategy <span class="added-tag">NEW</span></h2>
+  <p>When a deployment breaks production, you need to revert fast. Here's how to roll back for each stack.</p>
+
+  <h3>Option 1: Git Revert (Safest)</h3>
+  <p>Creates a new commit that undoes the last change. Keeps history clean and re-triggers CI/CD:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">Your Local Machine</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">git</span> revert HEAD
+<span class="prompt">$ </span><span class="cmd">git</span> push origin main    <span class="c"># Triggers CI/CD to deploy the revert</span></pre>
+  </div>
+
+  <h3>Option 2: Manual VPS Rollback (Fastest)</h3>
+  <p>SSH into your VPS and checkout the previous working commit:</p>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="c"># See recent commits</span>
+<span class="prompt">$ </span><span class="cmd">git</span> log --oneline <span class="flag">-5</span>
+
+<span class="c"># Roll back to specific commit</span>
+<span class="prompt">$ </span><span class="cmd">git</span> checkout &lt;commit_hash&gt; .
+
+<span class="c"># Then restart your app</span>
+<span class="prompt">$ </span><span class="cmd">pm2</span> restart myapp              <span class="c"># Node.js</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl restart myapp   <span class="c"># Python/PHP</span></pre>
+  </div>
+
+  <h3>Option 3: Database Rollback (Laravel/Django)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="c"># Django — undo last migration</span>
+<span class="prompt">$ </span><span class="cmd">python</span> manage.py migrate your_app &lt;previous_migration_name&gt;
+
+<span class="c"># Laravel — rollback last batch</span>
+<span class="prompt">$ </span><span class="cmd">php</span> artisan migrate:rollback</pre>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>ALWAYS BACKUP FIRST</strong> — Before any rollback involving database changes:<br>
+    PostgreSQL: <code>pg_dump yourapp_db > backup_$(date +%Y%m%d).sql</code><br>
+    MySQL: <code>mysqldump yourapp_db > backup_$(date +%Y%m%d).sql</code></div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== TROUBLESHOOTING ====== -->
+<section class="section" id="troubleshooting">
+  <div class="section-label"><span class="line"></span> TROUBLESHOOTING</div>
+  <h2>Common Issues</h2>
+
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Permission denied (publickey)</strong> — Check <code>~/.ssh/authorized_keys</code> and permissions (<code>700</code> for <code>.ssh/</code>, <code>600</code> for <code>authorized_keys</code>). Also ensure the VPS has a key added to GitHub (Part 2 Step 4).</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Connection refused</strong> — SSH not running? <code>sudo systemctl status sshd</code>. Firewall? <code>sudo ufw allow 22</code>.</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>502 Bad Gateway</strong> — App not running or wrong Nginx <code>proxy_pass</code> port. Check with: <code>sudo systemctl status myapp</code> or <code>pm2 status</code>.</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 11.</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>pm2 not found</strong> — Source nvm first: <code>export NVM_DIR="$HOME/.nvm" && source "$NVM_DIR/nvm.sh"</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>composer not found</strong> — Install: <code>curl -sS https://getcomposer.org/installer | php && sudo mv composer.phar /usr/local/bin/composer</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Workflow not triggered</strong> — File must be at <code>.github/workflows/deploy.yml</code>. Check branch is <code>main</code>.</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>git pull fails on VPS</strong> — VPS needs its own SSH key added to GitHub. See Part 2, Step 4. For HTTPS repos, switch to SSH: <code>git remote set-url origin git@github.com:youruser/your-repo.git</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Build killed / out of memory</strong> — Add swap space (Part 5, Step 3). Check with <code>free -h</code>. For Node.js, also try: <code>NODE_OPTIONS="--max-old-space-size=1024" npm run build</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Certbot fails</strong> — DNS must point to your server first. Verify: <code>dig +short your_domain.com</code>. Also ensure port 80 is open: <code>sudo ufw allow 'Nginx Full'</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Laravel shows "500 Server Error"</strong> — Check permissions: <code>sudo chown -R youruser:www-data storage bootstrap/cache</code> and <code>chmod -R 775 storage bootstrap/cache</code>. Also check: <code>php artisan config:clear</code></div>
+  </div>
+</section>
+
+<div style="text-align:center; padding:48px 0; color:var(--text-subtle); font-size:13px;">
+  <p>Built by <strong style="color:var(--brand)">Bitsclan IT Solutions</strong> &middot; Enhanced Edition</p>
+</div>
+
+</div>
+</main>
+
+<script>
+// Copy code
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText.replace(/^\$ /gm, '').replace(/^# /gm, '');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  });
+}
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const fill = document.getElementById('progressFill');
+  const scrollTop = document.documentElement.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  fill.style.width = (scrollTop / scrollHeight * 100) + '%';
+  
+  // Back to top
+  const btn = document.getElementById('backToTop');
+  btn.classList.toggle('visible', scrollTop > 600);
+});
+
+// Active sidebar link
+const sections = document.querySelectorAll('section[id]');
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(a => a.classList.remove('active'));
+      const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+    }
+  });
+}, { rootMargin: '-80px 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+// Close sidebar on mobile
+sidebarLinks.forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 900) {
+      document.querySelector('.sidebar').classList.remove('open');
+    }
+  });
+});
+
+// OS toggle
+function setOS(os, btn) {
+  document.querySelectorAll('.os-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
