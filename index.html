@@ -696,16 +696,17 @@
   <div class="sidebar-section">
     <span class="sidebar-label">Getting Started</span>
     <a href="#prerequisites"><span class="num">00</span> Prerequisites</a>
+    <a href="#part9b"><span class="num">01</span> Subdomain & DNS</a>
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">SSH Setup</span>
-    <a href="#part1"><span class="num">01</span> Generate SSH Key</a>
-    <a href="#part2"><span class="num">02</span> Connect to VPS</a>
-    <a href="#part4"><span class="num">03</span> Secure Server</a>
+    <a href="#part1"><span class="num">02</span> Generate SSH Key</a>
+    <a href="#part2"><span class="num">03</span> Connect to VPS</a>
+    <a href="#part4"><span class="num">04</span> Secure Server</a>
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">CI/CD Pipelines</span>
-    <a href="#part5"><span class="num">04</span> Pipeline Setup</a>
+    <a href="#part5"><span class="num">05</span> Pipeline Setup</a>
     <a href="#python-pipelines"><span class="num">—</span> Python Pipelines</a>
     <a href="#js-pipelines"><span class="num">—</span> JavaScript Pipelines</a>
     <a href="#php-pipelines"><span class="num">—</span> PHP Pipeline</a>
@@ -713,12 +714,11 @@
   </div>
   <div class="sidebar-section">
     <span class="sidebar-label">Deployment</span>
-    <a href="#part6"><span class="num">05</span> Prepare Server</a>
-    <a href="#part6b"><span class="num">06</span> Setup Database <span class="new-badge">NEW</span></a>
-    <a href="#part7"><span class="num">07</span> Deploy App</a>
-    <a href="#part8"><span class="num">08</span> Keep App Running</a>
-    <a href="#part9"><span class="num">09</span> Nginx Configs</a>
-    <a href="#part9b"><span class="num">10</span> Subdomain & DNS <span class="new-badge">NEW</span></a>
+    <a href="#part6"><span class="num">06</span> Prepare Server</a>
+    <a href="#part6b"><span class="num">07</span> Setup Database <span class="new-badge">NEW</span></a>
+    <a href="#part7"><span class="num">08</span> Deploy App</a>
+    <a href="#part8"><span class="num">09</span> Keep App Running</a>
+    <a href="#part9"><span class="num">10</span> Nginx Configs</a>
     <a href="#part10"><span class="num">11</span> SSL (HTTPS)</a>
   </div>
   <div class="sidebar-section">
@@ -755,13 +755,13 @@
 
 <!-- FLOW OVERVIEW -->
 <div class="flow-overview">
-  <div class="flow-step"><div class="flow-num">01</div><div class="flow-label">Generate<br>SSH Key</div></div>
-  <div class="flow-step"><div class="flow-num">02</div><div class="flow-label">Connect<br>to VPS</div></div>
-  <div class="flow-step"><div class="flow-num">03</div><div class="flow-label">Secure<br>Server</div></div>
-  <div class="flow-step"><div class="flow-num">04</div><div class="flow-label">CI/CD<br>Pipeline</div></div>
-  <div class="flow-step new-step"><div class="flow-num">05</div><div class="flow-label">Subdomain<br>& DNS</div></div>
+  <div class="flow-step"><div class="flow-num">01</div><div class="flow-label">Subdomain<br>& DNS</div></div>
+  <div class="flow-step"><div class="flow-num">02</div><div class="flow-label">Generate<br>SSH Key</div></div>
+  <div class="flow-step"><div class="flow-num">03</div><div class="flow-label">Connect<br>to VPS</div></div>
+  <div class="flow-step"><div class="flow-num">04</div><div class="flow-label">Secure<br>Server</div></div>
+  <div class="flow-step"><div class="flow-num">05</div><div class="flow-label">CI/CD<br>Pipeline</div></div>
   <div class="flow-step"><div class="flow-num">06</div><div class="flow-label">Deploy<br>App</div></div>
-  <div class="flow-step new-step"><div class="flow-num">07</div><div class="flow-label">SSL<br>(HTTPS)</div></div>
+  <div class="flow-step"><div class="flow-num">07</div><div class="flow-label">SSL<br>(HTTPS)</div></div>
 </div>
 
 <hr>
@@ -814,9 +814,99 @@ youruser</pre>
 
 <hr>
 
-<!-- ====== PART 1 ====== -->
-<section class="section" id="part1">
+<!-- ====== PART 1 — SUBDOMAIN & DNS ====== -->
+<section class="section" id="part9b">
   <div class="section-label"><span class="line"></span> PART 1</div>
+  <h2>Subdomain & DNS Setup</h2>
+  <p>Each project gets its own subdomain: <code>projectname.bitsclan.us</code>. This is the first thing you set up for every new project.</p>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ️</div>
+    <div><strong>MULTI-PROJECT SETUP</strong> — Multiple projects are deployed on the same VPS, each with its own subdomain. Repeat these steps for every new project with a different project name.</div>
+  </div>
+
+  <div class="step" data-step="1">
+    <h3>Find Your VPS IP Address</h3>
+    <p>Login to the VPS panel at <strong>cpanel-new.bitsclan.us:10000</strong>. Once logged in, open the terminal from the panel and run:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">VPS Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">hostname</span> <span class="flag">-I</span></pre>
+    </div>
+    <p>This will output your VPS IP address, for example:</p>
+    <div class="code-block">
+      <pre>203.0.113.50</pre>
+    </div>
+    <p>Copy this IP — you'll need it for the DNS record in the next step.</p>
+    <div class="callout tip">
+      <div class="callout-icon">✨</div>
+      <div><strong>ALTERNATIVE</strong> — You can also use <code>curl ifconfig.me</code> or <code>ip addr show</code> to find the IP address.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="2">
+    <h3>Add DNS Record on my20.io</h3>
+    <p>Login to <strong>my20.io</strong> platform and navigate to <strong>Manage DNS</strong> → select <strong>bitsclan.us</strong> domain.</p>
+    <p>Add a new DNS record with these values:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Name</strong></td><td><code>projectname</code> (replace with your actual project name)</td></tr>
+          <tr><td><strong>Type</strong></td><td><code>A</code></td></tr>
+          <tr><td><strong>Data</strong></td><td>IP address of your VPS (from Step 1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Click <strong>Add Record</strong>. This creates <code>projectname.bitsclan.us</code> pointing to your VPS.</p>
+  </div>
+
+  <div class="step" data-step="3">
+    <h3>Create Virtual Server on VPS Panel</h3>
+    <p>Go back to <strong>cpanel-new.bitsclan.us:10000</strong></p>
+    <ol>
+      <li>Click <strong>Create New Virtual Server</strong></li>
+      <li>Enter the subdomain name: <code>projectname.bitsclan.us</code></li>
+      <li>Click <strong>Create</strong></li>
+    </ol>
+    <p>This will create the project directory and link it to the subdomain automatically.</p>
+    <div class="callout tip">
+      <div class="callout-icon">✨</div>
+      <div><strong>PROJECT PATH</strong> — Your project files on the VPS will be at:<br>
+      <code>/home/project_name/public_html/</code><br>
+      This is where you'll deploy your code.</div>
+    </div>
+  </div>
+
+  <div class="step" data-step="4">
+    <h3>Test the Subdomain</h3>
+    <p>After creating the virtual server, a default page is automatically set up. Test it by visiting your subdomain in the browser:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Browser</span></div>
+      <pre>http://projectname.bitsclan.us</pre>
+    </div>
+    <p>If you see the default page, your subdomain is working correctly and you can proceed with the rest of the setup.</p>
+  </div>
+
+  <div class="step" data-step="5">
+    <h3>Verify DNS Propagation</h3>
+    <p>If the subdomain doesn't load, check DNS propagation:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><span class="prompt">$ </span><span class="cmd">dig</span> +short projectname.bitsclan.us
+203.0.113.50</pre>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div><strong>PROPAGATION TIME</strong> — DNS changes can take 5 minutes to 48 hours. Use <a href="https://dnschecker.org" target="_blank" rel="noopener">dnschecker.org</a> to check worldwide propagation.</div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ====== PART 2 ====== -->
+<section class="section" id="part1">
+  <div class="section-label"><span class="line"></span> PART 2</div>
   <h2>Generate SSH Key Pair</h2>
   <p>Generate an SSH key pair on your <strong>local machine</strong> (skip if you already have one).</p>
 
@@ -882,13 +972,13 @@ Enter same passphrase again:</pre>
 
 <!-- ====== PART 2 ====== -->
 <section class="section" id="part2">
-  <div class="section-label"><span class="line"></span> PART 2</div>
+  <div class="section-label"><span class="line"></span> PART 3</div>
   <h2>Copy Public Key to VPS</h2>
   <p>Copy your public key to the VPS so you can authenticate without a password. Multiple developers will use this server — each one generates their own key and adds it.</p>
 
   <div class="callout info">
     <div class="callout-icon">ℹ️</div>
-    <div><strong>MULTI-DEVELOPER SETUP</strong> — Each developer generates their own SSH key (Part 1) and copies their public key to the VPS. Never share private keys between team members.</div>
+    <div><strong>MULTI-DEVELOPER SETUP</strong> — Each developer generates their own SSH key (Part 2) and copies their public key to the VPS. Never share private keys between team members.</div>
   </div>
 
   <h3>Option 1: Using ssh-copy-id (Linux / macOS / Git Bash)</h3>
@@ -971,7 +1061,7 @@ Enter same passphrase again:</pre>
 
 <!-- ====== PART 4 ====== -->
 <section class="section" id="part4">
-  <div class="section-label"><span class="line"></span> PART 3</div>
+  <div class="section-label"><span class="line"></span> PART 4</div>
   <h2>Secure the Server</h2>
   <p>Run these commands <strong>on your VPS server</strong>.</p>
 
@@ -1054,7 +1144,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 5 — CI/CD ====== -->
 <section class="section" id="part5">
-  <div class="section-label"><span class="line"></span> PART 4</div>
+  <div class="section-label"><span class="line"></span> PART 5</div>
   <h2>CI/CD Pipeline Setup</h2>
   <p>Using <strong>GitHub Actions</strong> — every push to <code>main</code> triggers automatic testing and deployment to your VPS.</p>
 
@@ -1644,7 +1734,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 6 — PREPARE SERVER ====== -->
 <section class="section" id="part6">
-  <div class="section-label"><span class="line"></span> PART 5</div>
+  <div class="section-label"><span class="line"></span> PART 6</div>
   <h2>Prepare Server</h2>
   <p>Install dependencies <strong>on your VPS server</strong>.</p>
 
@@ -1694,7 +1784,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 6B — DATABASE SETUP (NEW) ====== -->
 <section class="section" id="part6b">
-  <div class="section-label new-section"><span class="line"></span> PART 6 — ADDED</div>
+  <div class="section-label new-section"><span class="line"></span> PART 7 — ADDED</div>
   <h2>Setup Database <span class="added-tag">NEW</span></h2>
   <p>The CI/CD pipelines use test databases in GitHub Actions, but your VPS needs a real production database.</p>
 
@@ -1740,7 +1830,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 7 — DEPLOY ====== -->
 <section class="section" id="part7">
-  <div class="section-label"><span class="line"></span> PART 7</div>
+  <div class="section-label"><span class="line"></span> PART 8</div>
   <h2>Deploy Application</h2>
 
   <div class="callout new">
@@ -1797,7 +1887,7 @@ OpenSSH      ALLOW    Anywhere</pre>
 
 <!-- ====== PART 8 — KEEP RUNNING ====== -->
 <section class="section" id="part8">
-  <div class="section-label"><span class="line"></span> PART 8</div>
+  <div class="section-label"><span class="line"></span> PART 9</div>
   <h2>Keep App Running</h2>
 
   <h3>PM2 (Node.js / Next.js)</h3>
@@ -1858,7 +1948,7 @@ WantedBy=multi-user.target</pre>
 
 <!-- ====== PART 9 — NGINX (EXPANDED) ====== -->
 <section class="section" id="part9">
-  <div class="section-label"><span class="line"></span> PART 9</div>
+  <div class="section-label"><span class="line"></span> PART 10</div>
   <h2>Nginx Configurations</h2>
   <p>Different frameworks need different Nginx configs. Pick the one that matches your stack.</p>
 
@@ -1954,82 +2044,11 @@ WantedBy=multi-user.target</pre>
 
 <hr>
 
-<!-- ====== PART 9B — DNS SETUP (NEW) ====== -->
-<section class="section" id="part9b">
-  <div class="section-label new-section"><span class="line"></span> PART 10 — ADDED</div>
-  <h2>Subdomain & DNS Setup <span class="added-tag">NEW</span></h2>
-  <p>Each project gets its own subdomain: <code>projectname.bitsclan.us</code>. This section walks through adding the DNS record and creating the virtual server on the VPS.</p>
-
-  <div class="callout info">
-    <div class="callout-icon">ℹ️</div>
-    <div><strong>MULTI-PROJECT SETUP</strong> — Multiple projects are deployed on the same VPS, each with its own subdomain. Every new project repeats these steps with a different project name.</div>
-  </div>
-
-  <div class="step" data-step="1">
-    <h3>Add DNS Record on my20.io</h3>
-    <p>Login to <strong>my20.io</strong> platform and navigate to <strong>Manage DNS</strong> → select <strong>bitsclan.us</strong> domain.</p>
-    <p>Add a new DNS record with these values:</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Field</th><th>Value</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Name</strong></td><td><code>projectname</code> (replace with your actual project name)</td></tr>
-          <tr><td><strong>Type</strong></td><td><code>A</code></td></tr>
-          <tr><td><strong>Data</strong></td><td>IP address of your VPS (e.g. <code>203.0.113.50</code>)</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p>Click <strong>Add Record</strong>. This creates <code>projectname.bitsclan.us</code> pointing to your VPS.</p>
-  </div>
-
-  <div class="step" data-step="2">
-    <h3>Create Virtual Server on VPS Panel</h3>
-    <p>Login to your VPS panel at <strong>cpanel-new.bitsclan.us:10000</strong></p>
-    <ol>
-      <li>Click <strong>Create New Virtual Server</strong></li>
-      <li>Enter the subdomain name: <code>projectname.bitsclan.us</code></li>
-      <li>Click <strong>Create</strong></li>
-    </ol>
-    <p>This will create the project directory and link it to the subdomain automatically.</p>
-    <div class="callout tip">
-      <div class="callout-icon">✨</div>
-      <div><strong>PROJECT PATH</strong> — Your project files on the VPS will be at:<br>
-      <code>/home/project_name/public_html/</code><br>
-      This is where you'll deploy your code.</div>
-    </div>
-  </div>
-
-  <div class="step" data-step="3">
-    <h3>Test the Subdomain</h3>
-    <p>After creating the virtual server, a default page is automatically set up. Test it by visiting your subdomain in the browser:</p>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Browser</span></div>
-      <pre>http://projectname.bitsclan.us</pre>
-    </div>
-    <p>If you see the default page, your subdomain is working correctly and you can proceed to deploy your actual project.</p>
-  </div>
-
-  <div class="step" data-step="4">
-    <h3>Verify DNS Propagation</h3>
-    <p>If the subdomain doesn't load, check DNS propagation:</p>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">dig</span> +short projectname.bitsclan.us
-203.0.113.50</pre>
-    </div>
-    <div class="callout info">
-      <div class="callout-icon">ℹ️</div>
-      <div><strong>PROPAGATION TIME</strong> — DNS changes can take 5 minutes to 48 hours. Use <a href="https://dnschecker.org" target="_blank" rel="noopener">dnschecker.org</a> to check worldwide propagation. Wait until DNS resolves correctly before setting up SSL.</div>
-    </div>
-  </div>
-</section>
-
-<hr>
-
 <!-- ====== PART 10 — SSL ====== -->
 <section class="section" id="part10">
   <div class="section-label"><span class="line"></span> PART 11</div>
   <h2>SSL (HTTPS)</h2>
+
 
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
@@ -2161,7 +2180,7 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 9.</div>
+    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 10.</div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
@@ -2181,7 +2200,7 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>Build killed / out of memory</strong> — Add swap space (Part 3, Step 3). Check with <code>free -h</code>. For Node.js, also try: <code>NODE_OPTIONS="--max-old-space-size=1024" npm run build</code></div>
+    <div><strong>Build killed / out of memory</strong> — Add swap space (Part 4, Step 3). Check with <code>free -h</code>. For Node.js, also try: <code>NODE_OPTIONS="--max-old-space-size=1024" npm run build</code></div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
