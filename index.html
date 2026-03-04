@@ -641,6 +641,13 @@
     .flow-overview { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
   }
 
+  /* ========== OS FILTER ========== */
+  [data-os] { transition: opacity 0.2s, max-height 0.3s; }
+  body.os-win [data-os="linux"],
+  body.os-linux [data-os="win"] {
+    display: none !important;
+  }
+
   .progress-bar {
     position: fixed;
     top: var(--header-h);
@@ -772,28 +779,32 @@
   <h3>Find Your Username</h3>
   <p>Find your system username — it appears in all file paths throughout this guide.</p>
 
-  <h4>Windows</h4>
-  <p>Open Command Prompt or PowerShell:</p>
-  <div class="code-block">
-    <div class="code-header"><span class="file-icon">Command Prompt / PowerShell</span></div>
-    <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
+  <div data-os="win">
+    <h4>Windows</h4>
+    <p>Open Command Prompt or PowerShell:</p>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Command Prompt / PowerShell</span></div>
+      <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
 DESKTOP-ABC123\youruser
 
 <span class="prompt">$ </span><span class="cmd">echo</span> %USERNAME%
 youruser</pre>
+    </div>
+    <p>SSH keys stored at: <code>C:\Users\youruser\.ssh\</code></p>
   </div>
-  <p>SSH keys stored at: <code>C:\Users\youruser\.ssh\</code></p>
 
-  <h4>Ubuntu / Linux</h4>
-  <div class="code-block">
-    <div class="code-header"><span class="file-icon">Terminal</span></div>
-    <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
+  <div data-os="linux">
+    <h4>Ubuntu / Linux</h4>
+    <div class="code-block">
+      <div class="code-header"><span class="file-icon">Terminal</span></div>
+      <pre><span class="prompt">$ </span><span class="cmd">whoami</span>
 youruser
 
 <span class="prompt">$ </span><span class="cmd">echo</span> <span class="v">$USER</span>
 youruser</pre>
+    </div>
+    <p>SSH keys stored at: <code>/home/youruser/.ssh/</code></p>
   </div>
-  <p>SSH keys stored at: <code>/home/youruser/.ssh/</code></p>
 
   <div class="callout info">
     <div class="callout-icon">ℹ️</div>
@@ -811,8 +822,8 @@ youruser</pre>
 
   <div class="step" data-step="1">
     <h3>Open Your Terminal</h3>
-    <p><strong>Windows:</strong> Open <strong>Git Bash</strong> or <strong>WSL</strong> (Windows Subsystem for Linux)</p>
-    <p><strong>Ubuntu / macOS:</strong> <code>Ctrl + Alt + T</code> to open terminal</p>
+    <p data-os="win"><strong>Windows:</strong> Open <strong>Git Bash</strong> or <strong>WSL</strong> (Windows Subsystem for Linux)</p>
+    <p data-os="linux"><strong>Ubuntu / macOS:</strong> <code>Ctrl + Alt + T</code> to open terminal</p>
   </div>
 
   <div class="step" data-step="2">
@@ -822,15 +833,19 @@ youruser</pre>
       <div class="code-header"><span class="file-icon">Terminal / Git Bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
       <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span></pre>
     </div>
-    <h4>Ubuntu / macOS output</h4>
-    <div class="code-block">
-      <pre>Generating public/private rsa key pair.
+    <div data-os="linux">
+      <h4>Ubuntu / macOS output</h4>
+      <div class="code-block">
+        <pre>Generating public/private rsa key pair.
 Enter file in which to save the key (/home/youruser/.ssh/id_rsa):</pre>
+      </div>
     </div>
-    <h4>Windows (Git Bash / WSL) output</h4>
-    <div class="code-block">
-      <pre>Generating public/private rsa key pair.
+    <div data-os="win">
+      <h4>Windows (Git Bash / WSL) output</h4>
+      <div class="code-block">
+        <pre>Generating public/private rsa key pair.
 Enter file in which to save the key (/c/Users/youruser/.ssh/id_rsa):</pre>
+      </div>
     </div>
     <p>Press <strong>Enter</strong> to accept the default location.</p>
   </div>
@@ -851,8 +866,8 @@ Enter same passphrase again:</pre>
       <table>
         <thead><tr><th>OS</th><th>Private Key</th><th>Public Key</th></tr></thead>
         <tbody>
-          <tr><td>Ubuntu / macOS</td><td><code>~/.ssh/id_rsa</code></td><td><code>~/.ssh/id_rsa.pub</code></td></tr>
-          <tr><td>Windows</td><td><code>C:\Users\youruser\.ssh\id_rsa</code></td><td><code>C:\Users\youruser\.ssh\id_rsa.pub</code></td></tr>
+          <tr data-os="linux"><td>Ubuntu / macOS</td><td><code>~/.ssh/id_rsa</code></td><td><code>~/.ssh/id_rsa.pub</code></td></tr>
+          <tr data-os="win"><td>Windows</td><td><code>C:\Users\youruser\.ssh\id_rsa</code></td><td><code>C:\Users\youruser\.ssh\id_rsa.pub</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -888,15 +903,19 @@ Enter same passphrase again:</pre>
 
   <div class="step" data-step="1">
     <h3>View Your Public Key</h3>
-    <h4>Ubuntu / macOS</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_rsa.pub</pre>
+    <div data-os="linux">
+      <h4>Ubuntu / macOS</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/id_rsa.pub</pre>
+      </div>
     </div>
-    <h4>Windows</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Git Bash / WSL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cat</span> /c/Users/youruser/.ssh/id_rsa.pub</pre>
+    <div data-os="win">
+      <h4>Windows</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Git Bash / WSL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">cat</span> /c/Users/youruser/.ssh/id_rsa.pub</pre>
+      </div>
     </div>
     <p>Copy the entire output to your clipboard.</p>
   </div>
@@ -1041,15 +1060,19 @@ OpenSSH      ALLOW    Anywhere</pre>
 
   <div class="step" data-step="1">
     <h3>Generate Deploy Key</h3>
-    <h4>Ubuntu</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> ~/.ssh/deploy_key</pre>
+    <div data-os="linux">
+      <h4>Ubuntu</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> ~/.ssh/deploy_key</pre>
+      </div>
     </div>
-    <h4>Windows</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> C:\Users\youruser\.ssh\deploy_key</pre>
+    <div data-os="win">
+      <h4>Windows</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">ssh-keygen</span> <span class="flag">-t</span> ed25519 <span class="flag">-C</span> <span class="s">"github-deploy"</span> <span class="flag">-f</span> C:\Users\youruser\.ssh\deploy_key</pre>
+      </div>
     </div>
     <p>Press <strong>Enter</strong> for no passphrase (required for automation).</p>
     <p><code>deploy_key</code> → Private key → GitHub Secrets &nbsp;|&nbsp; <code>deploy_key.pub</code> → Public key → VPS server</p>
@@ -1076,15 +1099,19 @@ OpenSSH      ALLOW    Anywhere</pre>
 
   <div class="step" data-step="3">
     <h3>Copy Private Key</h3>
-    <h4>Ubuntu</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/deploy_key</pre>
+    <div data-os="linux">
+      <h4>Ubuntu</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">cat</span> ~/.ssh/deploy_key</pre>
+      </div>
     </div>
-    <h4>Windows</h4>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\deploy_key</pre>
+    <div data-os="win">
+      <h4>Windows</h4>
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">type</span> C:\Users\youruser\.ssh\deploy_key</pre>
+      </div>
     </div>
     <div class="callout warning">
       <div class="callout-icon">⚠️</div>
@@ -1114,15 +1141,19 @@ OpenSSH      ALLOW    Anywhere</pre>
 
   <div class="step" data-step="5">
     <h3>Create Workflow Directory</h3>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Ubuntu</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cd</span> ~/your-repo
+    <div data-os="linux">
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Ubuntu</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">cd</span> ~/your-repo
 <span class="prompt">$ </span><span class="cmd">mkdir</span> <span class="flag">-p</span> .github/workflows</pre>
+      </div>
     </div>
-    <div class="code-block">
-      <div class="code-header"><span class="file-icon">Windows</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-      <pre><span class="prompt">$ </span><span class="cmd">cd</span> C:\Users\youruser\your-repo
+    <div data-os="win">
+      <div class="code-block">
+        <div class="code-header"><span class="file-icon">Windows</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="prompt">$ </span><span class="cmd">cd</span> C:\Users\youruser\your-repo
 <span class="prompt">$ </span><span class="cmd">mkdir</span> .github\workflows</pre>
+      </div>
     </div>
   </div>
 
@@ -2225,6 +2256,9 @@ sidebarLinks.forEach(a => {
 function setOS(os, btn) {
   document.querySelectorAll('.os-toggle button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.body.classList.remove('os-win', 'os-linux');
+  if (os === 'win') document.body.classList.add('os-win');
+  if (os === 'linux') document.body.classList.add('os-linux');
 }
 </script>
 </body>
