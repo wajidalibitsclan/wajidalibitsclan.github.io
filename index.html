@@ -718,7 +718,7 @@
     <a href="#part6b"><span class="num">07</span> Setup Database <span class="new-badge">NEW</span></a>
     <a href="#part7"><span class="num">08</span> Deploy App</a>
     <a href="#part8"><span class="num">09</span> Keep App Running</a>
-    <a href="#part9"><span class="num">10</span> Nginx Configs</a>
+    <a href="#part9"><span class="num">10</span> Server Configs</a>
     <a href="#part10"><span class="num">11</span> SSL (HTTPS)</a>
   </div>
   <div class="sidebar-section">
@@ -1765,7 +1765,10 @@ OpenSSH      ALLOW    Anywhere</pre>
 <span class="prompt">$ </span><span class="cmd">sudo</span> mv composer.phar /usr/local/bin/composer</pre>
   </div>
 
-  <h3>Nginx</h3>
+  <h3>Web Server — Choose One</h3>
+  <p>Pick <strong>either</strong> Nginx or Apache. Do not install both on the same port.</p>
+
+  <h4>Option A: Nginx</h4>
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> nginx
@@ -1773,10 +1776,21 @@ OpenSSH      ALLOW    Anywhere</pre>
 <span class="prompt">$ </span><span class="cmd">sudo</span> ufw allow <span class="s">'Nginx Full'</span></pre>
   </div>
 
+  <h4>Option B: Apache</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> apache2
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl enable apache2
+<span class="prompt">$ </span><span class="cmd">sudo</span> ufw allow <span class="s">'Apache Full'</span>
+<span class="c"># Enable required modules</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> a2enmod proxy proxy_http rewrite headers ssl</pre>
+  </div>
+
   <div class="callout new">
     <div class="callout-icon">💡</div>
-    <div><strong>CLEAN UP DEFAULT SITE</strong> — Remove the default Nginx page to avoid conflicts:<br>
-    <code>sudo rm /etc/nginx/sites-enabled/default</code></div>
+    <div><strong>CLEAN UP DEFAULT SITE</strong> —<br>
+    Nginx: <code>sudo rm /etc/nginx/sites-enabled/default</code><br>
+    Apache: <code>sudo a2dissite 000-default.conf && sudo systemctl reload apache2</code></div>
   </div>
 </section>
 
@@ -1946,13 +1960,20 @@ WantedBy=multi-user.target</pre>
 
 <hr>
 
-<!-- ====== PART 9 — NGINX (EXPANDED) ====== -->
+<!-- ====== PART 9 — WEB SERVER CONFIGS ====== -->
 <section class="section" id="part9">
   <div class="section-label"><span class="line"></span> PART 10</div>
-  <h2>Nginx Configurations</h2>
-  <p>Different frameworks need different Nginx configs. Pick the one that matches your stack.</p>
+  <h2>Web Server Configurations</h2>
+  <p>Different frameworks need different configs. Pick the one matching your stack — configs are provided for <strong>both Nginx and Apache</strong>.</p>
 
+  <!-- ── REVERSE PROXY ── -->
   <h3>Reverse Proxy — Node.js / FastAPI / Django / Flask</h3>
+  <div class="callout tip">
+    <div class="callout-icon">✨</div>
+    <div><strong>PORT MAP</strong> — Change <code>3000</code> to: <code>8000</code> (FastAPI/Django), <code>5000</code> (Flask), <code>3000</code> (Node.js/Next.js).</div>
+  </div>
+
+  <h4>Nginx</h4>
   <div class="code-block">
     <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/myapp</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="k">server</span> {
@@ -1971,13 +1992,30 @@ WantedBy=multi-user.target</pre>
     }
 }</pre>
   </div>
-  <div class="callout tip">
-    <div class="callout-icon">✨</div>
-    <div><strong>PORT MAP</strong> — Change <code>3000</code> to: <code>8000</code> (FastAPI/Django), <code>5000</code> (Flask), <code>3000</code> (Node.js/Next.js).</div>
+
+  <h4>Apache</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--red)"></span> /etc/apache2/sites-available/myapp.conf</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">&lt;VirtualHost</span> *:80<span class="k">&gt;</span>
+    <span class="k">ServerName</span> your_domain.com
+
+    <span class="k">ProxyPreserveHost</span> On
+    <span class="k">ProxyPass</span> / http://localhost:<span class="n">3000</span>/
+    <span class="k">ProxyPassReverse</span> / http://localhost:<span class="n">3000</span>/
+
+    <span class="k">RequestHeader</span> set X-Forwarded-Proto <span class="s">"http"</span>
+    <span class="k">RequestHeader</span> set X-Real-IP <span class="s">"%{REMOTE_ADDR}s"</span>
+
+    <span class="k">ErrorLog</span>  ${APACHE_LOG_DIR}/myapp-error.log
+    <span class="k">CustomLog</span> ${APACHE_LOG_DIR}/myapp-access.log combined
+<span class="k">&lt;/VirtualHost&gt;</span></pre>
   </div>
 
-  <h3>Static Site — React / Vue <span class="added-tag">NEW</span></h3>
-  <p>React and Vue build to static files. They don't need a proxy — Nginx serves them directly:</p>
+  <!-- ── STATIC SITE ── -->
+  <h3>Static Site — React / Vue</h3>
+  <p>React and Vue build to static files — the web server serves them directly.</p>
+
+  <h4>Nginx</h4>
   <div class="code-block">
     <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/my-react-app</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="k">server</span> {
@@ -2000,13 +2038,42 @@ WantedBy=multi-user.target</pre>
 }</pre>
   </div>
 
-  <div class="callout warning">
-    <div class="callout-icon">⚠️</div>
-    <div><strong>CRITICAL</strong> — The <code>try_files</code> directive is essential for single-page apps. Without it, refreshing any non-root URL (e.g. <code>/about</code>) returns a 404.</div>
+  <h4>Apache</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--red)"></span> /etc/apache2/sites-available/my-react-app.conf</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">&lt;VirtualHost</span> *:80<span class="k">&gt;</span>
+    <span class="k">ServerName</span> your_domain.com
+
+    <span class="k">DocumentRoot</span> /var/www/your-react-app
+
+    <span class="k">&lt;Directory</span> /var/www/your-react-app<span class="k">&gt;</span>
+        <span class="k">Options</span> -Indexes +FollowSymLinks
+        <span class="k">AllowOverride</span> All
+        <span class="k">Require</span> all granted
+
+        <span class="c"># Handle client-side routing (React Router / Vue Router)</span>
+        <span class="k">FallbackResource</span> /index.html
+    <span class="k">&lt;/Directory&gt;</span>
+
+    <span class="c"># Cache static assets</span>
+    <span class="k">&lt;FilesMatch</span> <span class="s">"\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$"</span><span class="k">&gt;</span>
+        <span class="k">Header</span> set Cache-Control <span class="s">"public, max-age=31536000, immutable"</span>
+    <span class="k">&lt;/FilesMatch&gt;</span>
+
+    <span class="k">ErrorLog</span>  ${APACHE_LOG_DIR}/react-error.log
+    <span class="k">CustomLog</span> ${APACHE_LOG_DIR}/react-access.log combined
+<span class="k">&lt;/VirtualHost&gt;</span></pre>
   </div>
 
-  <h3>PHP-FPM — Laravel <span class="added-tag">NEW</span></h3>
-  <p>Laravel uses PHP-FPM, not a Node-style proxy:</p>
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>CRITICAL</strong> — The <code>try_files</code> (Nginx) or <code>FallbackResource</code> (Apache) directive is essential for single-page apps. Without it, refreshing any non-root URL (e.g. <code>/about</code>) returns a 404.</div>
+  </div>
+
+  <!-- ── PHP / LARAVEL ── -->
+  <h3>PHP-FPM — Laravel</h3>
+
+  <h4>Nginx</h4>
   <div class="code-block">
     <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--orange)"></span> /etc/nginx/sites-available/laravel-app</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="k">server</span> {
@@ -2032,13 +2099,46 @@ WantedBy=multi-user.target</pre>
 }</pre>
   </div>
 
+  <h4>Apache</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon"><span class="dot" style="background:var(--red)"></span> /etc/apache2/sites-available/laravel-app.conf</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="k">&lt;VirtualHost</span> *:80<span class="k">&gt;</span>
+    <span class="k">ServerName</span> your_domain.com
+
+    <span class="k">DocumentRoot</span> /home/youruser/your-repo/public
+
+    <span class="k">&lt;Directory</span> /home/youruser/your-repo/public<span class="k">&gt;</span>
+        <span class="k">Options</span> -Indexes +FollowSymLinks
+        <span class="k">AllowOverride</span> All
+        <span class="k">Require</span> all granted
+    <span class="k">&lt;/Directory&gt;</span>
+
+    <span class="k">ErrorLog</span>  ${APACHE_LOG_DIR}/laravel-error.log
+    <span class="k">CustomLog</span> ${APACHE_LOG_DIR}/laravel-access.log combined
+<span class="k">&lt;/VirtualHost&gt;</span></pre>
+  </div>
+  <div class="callout tip">
+    <div class="callout-icon">✨</div>
+    <div><strong>LARAVEL + APACHE</strong> — Laravel ships with a <code>public/.htaccess</code> file that handles URL rewriting automatically. <code>AllowOverride All</code> enables it.</div>
+  </div>
+
+  <!-- ── ENABLE SITE ── -->
   <h3>Enable Your Site</h3>
+  <h4>Nginx</h4>
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="prompt">$ </span><span class="cmd">sudo</span> ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
 <span class="prompt">$ </span><span class="cmd">sudo</span> rm <span class="flag">-f</span> /etc/nginx/sites-enabled/default  <span class="c"># Remove default site</span>
 <span class="prompt">$ </span><span class="cmd">sudo</span> nginx -t
 <span class="prompt">$ </span><span class="cmd">sudo</span> systemctl restart nginx</pre>
+  </div>
+  <h4>Apache</h4>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> a2ensite myapp.conf
+<span class="prompt">$ </span><span class="cmd">sudo</span> a2dissite 000-default.conf             <span class="c"># Remove default site</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> apache2ctl configtest
+<span class="prompt">$ </span><span class="cmd">sudo</span> systemctl restart apache2</pre>
   </div>
 </section>
 
@@ -2050,18 +2150,33 @@ WantedBy=multi-user.target</pre>
   <h2>SSL (HTTPS)</h2>
 
 
+  <h3>If using Nginx</h3>
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-    <pre><span class="c"># For subdomain projects</span>
-<span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-nginx
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-nginx
+
+<span class="c"># For subdomain projects</span>
 <span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--nginx</span> -d projectname.bitsclan.us
 
 <span class="c"># For custom domains</span>
 <span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--nginx</span> -d your_domain.com -d www.your_domain.com</pre>
   </div>
-  <p>Certbot will ask for your email and modify your Nginx config automatically.</p>
 
-  <h3>Verify Auto-Renewal <span class="added-tag">NEW</span></h3>
+  <h3>If using Apache</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="prompt">$ </span><span class="cmd">sudo</span> apt install <span class="flag">-y</span> certbot python3-certbot-apache
+
+<span class="c"># For subdomain projects</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--apache</span> -d projectname.bitsclan.us
+
+<span class="c"># For custom domains</span>
+<span class="prompt">$ </span><span class="cmd">sudo</span> certbot <span class="flag">--apache</span> -d your_domain.com -d www.your_domain.com</pre>
+  </div>
+
+  <p>Certbot will ask for your email and modify your web server config automatically.</p>
+
+  <h3>Verify Auto-Renewal</h3>
   <p>Let's Encrypt certificates expire every 90 days. Certbot installs a systemd timer that auto-renews, but verify it's active:</p>
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
@@ -2072,11 +2187,14 @@ WantedBy=multi-user.target</pre>
   <div class="code-block">
     <div class="code-header"><span class="file-icon">VPS Server</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="prompt">$ </span><span class="cmd">sudo</span> crontab -e
-<span class="c"># Add this line:</span>
-0 3 * * * certbot renew --quiet --post-hook "systemctl reload nginx"</pre>
+<span class="c"># Add this line (Nginx):</span>
+0 3 * * * certbot renew --quiet --post-hook "systemctl reload nginx"
+
+<span class="c"># Or for Apache:</span>
+0 3 * * * certbot renew --quiet --post-hook "systemctl reload apache2"</pre>
   </div>
 
-  <p>Your site is now live at <code>https://your_domain.com</code> 🎉</p>
+  <p>Your site is now live at <code>https://your_domain.com</code></p>
 </section>
 
 <hr>
@@ -2098,6 +2216,9 @@ WantedBy=multi-user.target</pre>
         <tr><td>Restart (PM2)</td><td><code>pm2 restart myapp</code></td></tr>
         <tr><td>Restart (systemd)</td><td><code>sudo systemctl restart myapp</code></td></tr>
         <tr><td>Restart Nginx</td><td><code>sudo systemctl restart nginx</code></td></tr>
+        <tr><td>Restart Apache</td><td><code>sudo systemctl restart apache2</code></td></tr>
+        <tr><td>Test Apache config</td><td><code>sudo apache2ctl configtest</code></td></tr>
+        <tr><td>Apache error log</td><td><code>sudo tail -f /var/log/apache2/error.log</code></td></tr>
         <tr><td>Renew SSL</td><td><code>sudo certbot renew</code></td></tr>
         <tr><td>Check disk space</td><td><code>df -h</code></td></tr>
         <tr><td>Check memory</td><td><code>free -h</code></td></tr>
@@ -2176,11 +2297,11 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>502 Bad Gateway</strong> — App not running or wrong Nginx <code>proxy_pass</code> port. Check with: <code>sudo systemctl status myapp</code> or <code>pm2 status</code>.</div>
+    <div><strong>502 Bad Gateway (Nginx) / 503 Service Unavailable (Apache)</strong> — App not running or wrong proxy port. Check with: <code>sudo systemctl status myapp</code> or <code>pm2 status</code>. Apache: also verify proxy modules are enabled: <code>sudo a2enmod proxy proxy_http</code>.</div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>404 on page refresh (React/Vue)</strong> — Missing <code>try_files $uri $uri/ /index.html;</code> in Nginx config. See the Static Site config in Part 10.</div>
+    <div><strong>404 on page refresh (React/Vue)</strong> — Nginx: missing <code>try_files $uri $uri/ /index.html;</code>. Apache: missing <code>FallbackResource /index.html</code> or <code>AllowOverride All</code>. See the Static Site config in Part 10.</div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
@@ -2204,11 +2325,19 @@ WantedBy=multi-user.target</pre>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
-    <div><strong>Certbot fails</strong> — DNS must point to your server first. Verify: <code>dig +short your_domain.com</code>. Also ensure port 80 is open: <code>sudo ufw allow 'Nginx Full'</code></div>
+    <div><strong>Certbot fails</strong> — DNS must point to your server first. Verify: <code>dig +short your_domain.com</code>. Also ensure port 80 is open: <code>sudo ufw allow 'Nginx Full'</code> or <code>sudo ufw allow 'Apache Full'</code></div>
   </div>
   <div class="callout danger" style="margin-bottom:12px">
     <div class="callout-icon">❌</div>
     <div><strong>Laravel shows "500 Server Error"</strong> — Check permissions: <code>sudo chown -R youruser:www-data storage bootstrap/cache</code> and <code>chmod -R 775 storage bootstrap/cache</code>. Also check: <code>php artisan config:clear</code></div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Apache "AH00526: Syntax error"</strong> — Config file has errors. Check with: <code>sudo apache2ctl configtest</code>. Common cause: missing closing <code>&lt;/VirtualHost&gt;</code> tag.</div>
+  </div>
+  <div class="callout danger" style="margin-bottom:12px">
+    <div class="callout-icon">❌</div>
+    <div><strong>Apache proxy returns "Service Unavailable"</strong> — Proxy modules not enabled. Run: <code>sudo a2enmod proxy proxy_http</code> then <code>sudo systemctl restart apache2</code>. Also verify your app is running on the expected port.</div>
   </div>
 </section>
 
